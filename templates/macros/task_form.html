@@ -1,0 +1,92 @@
+{% macro task_form(tags, tag_ids, task, mode='create') %}
+<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+
+<div class="main-content p-4">
+    <div class="modal-content">
+        <div class="modal-header pb-3">
+            <h5 class="modal-title">{{ "Create a New" if mode == 'create' else "Edit" if mode == 'edit' else "" }} Task
+            </h5>
+        </div>
+        <form method="POST"
+            action="{{ url_for('tasks.create_task') if mode == 'create' else url_for('tasks.edit_task', task_id=task.id) if mode == 'edit' else '' }}"
+            class="modal-body needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="task-title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="task-title" name="title"
+                    value="{{ task.title if mode == 'edit' and task.title else '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="task-description" class="form-label">Description</label>
+                <textarea class="form-control" id="task-description" name="description"
+                    rows="3">{{ task.description if mode == 'edit' and task.description else '' }}</textarea>
+            </div>
+
+            <div class="mb-3 d-flex justify-content-between gap-3">
+                <div class="mb-3 w-50">
+                    <label for="task-priority" class="form-label">Priority</label>
+                    <select class="form-select" id="task-priority" name="priority">
+                        <option value="Low" {% if mode == 'edit' and task.priority == 'Low' %}selected{% endif %}>Low
+                        </option>
+                        <option value="Medium" {% if mode == 'edit' and task.priority == 'Medium' %}selected{% endif %}>
+                            Medium</option>
+                        <option value="High" {% if mode == 'edit' and task.priority == 'High' %}selected{% endif %}>High
+                        </option>
+                    </select>
+                </div>
+
+                <div class="mb-3 w-50">
+                    <label for="task-status" class="form-label">Status</label>
+                    <select class="form-select" id="task-status" name="status">
+                        <option value="Pending" {% if mode == 'edit' and task.status == 'Pending' %}selected{% endif %}>
+                            Pending</option>
+                        <option value="In Progress"
+                            {% if mode == 'edit' and task.status == 'In Progress' %}selected{% endif %}>
+                            In Progress</option>
+                        <option value="Completed"
+                            {% if mode == 'edit' and task.status == 'Completed' %}selected{% endif %}>
+                            Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-content-between gap-3">
+                <div class="mb-3 w-50">
+                    <label for="task-tags" class="form-label">Tags</label>
+                    <select multiple data-bs-toggle="tooltip"
+                        data-bs-title="Press the 'Shift' key to select multiple tags" class="form-select" id="task-tags"
+                        name="tags[]">
+                        {% for tag in tags %}
+                        <option value="{{ tag.id }}" data-color="{{ tag.color }}"
+                            {% if task and tag_ids and tag.id in tag_ids %}selected{% endif %}>{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3 w-50">
+                    <label for="task-due-date" class="form-label">Due Date</label>
+                    <input type="datetime-local" class="form-control" id="task-due-date" name="due-date"
+                        value="{% if mode == 'edit' and task.due_date %}{{ task.due_date }}{% endif %}">
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-center gap-3">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                {% if mode == 'edit' %}
+                <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}">
+                    <input type="hidden" name="task-id" value="{{ task.id }}">
+                    <button type="submit" class="btn btn-danger remove-task">Delete Task</button>
+                </form>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">
+                    {% if mode == 'create' %}
+                    Create Task
+                    {% elif mode == 'edit' %}
+                    Save Changes
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}

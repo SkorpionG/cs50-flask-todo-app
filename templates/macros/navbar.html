@@ -1,0 +1,69 @@
+{% macro nav_item(name, url, active=False) %}
+<li class="nav-item">
+    <a href="{{ url }}" class="nav-link {{ 'active' if active and request.path == url }}">
+        {{ name }}
+    </a>
+</li>
+{% endmacro %}
+
+{% macro navbar(pages, is_authenticated=False) %}
+<nav class="navbar navbar-expand-sm bg-body-tertiary" role="navigation">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Logo" width="30" height="24"
+                class="d-inline-block align-text-top">
+            Todo App
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-links"
+            aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar-links">
+            <ul class="navbar-nav me-auto">
+                {% for page in pages %}
+                {{ nav_item(
+                    name=page['name'],
+                    url=page['url'],
+                    active=page['active']
+                ) }}
+                {% endfor %}
+            </ul>
+            <ul class="d-flex navbar-nav">
+                {% set endpoint = request.endpoint %}
+                {% set path = request.path %}
+                {% if is_authenticated %}
+                {{ nav_item(
+                    name='Dashboard',
+                    url=url_for('dashboard'),
+                    active= endpoint == 'dashboard' and path == url_for('dashboard')
+                )}}
+                {{ nav_item(
+                    name='Logout',
+                    url=url_for('auth.logout'),
+                    active= endpoint == 'auth.logout' and path == url_for('auth.logout')
+                )}}
+                {% else %}
+                {{ nav_item(
+                    name='Login',
+                    url=url_for('auth.login'),
+                    active= endpoint == 'auth.login' and path == url_for('auth.login')
+                )}}
+                {{ nav_item(
+                    name='Register',
+                    url=url_for('auth.register'),
+                    active= endpoint == 'auth.register' and path == url_for('auth.register')
+                )}}
+                {% endif %}
+                <!-- {% for link in links %}
+                {{ nav_item(
+                                name=link.name,
+                                url=link.url,
+                                icon=link.icon,
+                                active=link.active
+                            ) }}
+                {% endfor %} -->
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endmacro %}

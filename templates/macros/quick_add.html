@@ -1,0 +1,112 @@
+{% macro quick_add(tags) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quick_add.css') }}">
+<script src="{{ url_for('static', filename='js/quick_add.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+
+<div class="fab-container">
+    <!-- Main FAB -->
+    <button title="Create New Task or Tag" class="fab-button main-fab" id="main-fab">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- FAB Menu -->
+    <div class="fab-menu" id="fab-menu">
+        <button class="fab-button fab-item" id="create-task">
+            <i class="fas fa-tasks"></i>
+            <span class="fab-label">New Task</span>
+        </button>
+        <button class="fab-button fab-item" id="create-tag">
+            <i class="fas fa-tag"></i>
+            <span class="fab-label">New Tag</span>
+        </button>
+    </div>
+</div>
+
+<div class="create-modal" id="task-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Create New Task</h5>
+            <button title="Close" type="button" class="btn-close" data-modal-close="taskModal"></button>
+        </div>
+        <form method="POST" action="{{ url_for('tasks.create_task') }}" class="modal-body needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="task-title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="task-title" name="title">
+            </div>
+
+            <div class="mb-3">
+                <label for="task-description" class="form-label">Description</label>
+                <textarea class="form-control" id="task-description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="task-due-date" class="form-label">Due Date</label>
+                <input type="datetime-local" class="form-control" id="task-due-date" name="due-date">
+            </div>
+
+            <div class="mb-3">
+                <label for="task-priority" class="form-label">Priority</label>
+                <select class="form-select" id="task-priority" name="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="task-status" class="form-label">Status</label>
+                <select class="form-select" id="task-status" name="status">
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="task-tags" class="form-label">Tags</label>
+                <select multiple data-bs-toggle="tooltip" data-bs-title="Press the 'Shift' key to select multiple tags"
+                    class="form-select" id="task-tags" name="tags[]">
+                    {% if tags %}
+                    {% for tag in tags %}
+                    <option value="{{ tag.id }}" data-color="{{ tag.color }}">
+                        {{ tag.name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close="taskModal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tag Form Modal -->
+<div class="create-modal" id="tag-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Create New Tag</h5>
+            <button title="Close" type="button" class="btn-close" data-modal-close="tagModal"></button>
+        </div>
+        <form method="POST" action="{{ url_for('tags.create_tag') }}" class="modal-body needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="tag-name" class="form-label">Tag Name</label>
+                <input type="text" class="form-control" id="tag-name" name="name">
+            </div>
+
+            <div class="mb-3">
+                <label for="tag-color" class="form-label">Tag Color</label>
+                <input type="color" class="form-control form-control-color" id="tag-color" name="color" value="#6c757d"
+                    title="Choose a color">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close="tagModal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Tag</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}

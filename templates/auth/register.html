@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+{% from 'macros/form/auth.html' import username_input, email_input, password_input, remember_me %}
+<main id="register-page" class="auth-page">
+    {% include 'components/header.html' %}
+    <div id="register-container" class="d-flex justify-content-center align-items-center auth-container">
+        <form id="register-form" class="w-100 mx-auto needs-validation bg-body-tertiary p-4 rounded my-5" novalidate
+            method="POST" action="{{ url_for('auth.register') }}">
+            <h1 class="py-3 text-center">Register</h1>
+            <div class="row mb-3 g-3">
+                <div class="col-md-5 col-sm-12">
+                    {{ username_input(validation_message="Please set a username.", custom_validation="on") }}
+                </div>
+                <div class="col-md-7 col-sm-12">
+                    {{ email_input(validation_message="Please provide a email address.", custom_validation="on", tooltip_text="If you already have an account, you can't use that email to register.", placeholder="yourname@example.com") }}
+                    <div class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+            </div>
+            <div class="row mb-3 g-3">
+                <div class="col-md-6 col-sm-12">
+                    {{ password_input(validation_message="Please provide a password.", custom_validation="on", tooltip_text="Make a password between 8 and 40 characters long", info_icon=True, info_text="Your password must be at least 8 characters long, contain letters, numbers and special characters, and must not contain spaces, emoji, or other non-ASCII characters.", validation_info="on", bind_validation=True) }}
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    {{ password_input(name="confirm-password", label="Confirm Password", placeholder="Confirm Password", validation_message="Please confirm your password.", custom_validation="on", tooltip_text="Make sure to save your password.", type="confirm") }}
+                </div>
+                <div id="password-validation-info" class="form-text d-flex align-items-center flex-column text-center">
+                </div>
+            </div>
+            <div class="mb-3 form-check">
+                {{ remember_me() }}
+            </div>
+            <button type="submit" class="w-100 btn btn-primary">Register</button>
+            <div id="account-help" class="form-text">Already have an account? <a
+                    href="{{ url_for('auth.login') }}">Login here</a></div>
+        </form>
+    </div>
+</main>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

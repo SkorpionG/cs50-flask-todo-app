@@ -1,0 +1,72 @@
+{% macro tab_item(name, url, icon, active=False) %}
+<li class="nav-item">
+    <a href="{{ url }}" class="nav-link {{ 'active' if active and request.path == url }}">
+        <i class="fas {{ icon }}"></i>
+        <span class="ms-2">{{ name }}</span>
+    </a>
+</li>
+{% endmacro %}
+
+
+{% macro sidebar(tabs) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+<div class="sidebar bg-light border-end">
+    <!-- Logo -->
+    <div class="sidebar-header p-3 text-center">
+        <a href="{{ url_for('dashboard') }}" class="text-decoration-none">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Logo" width="30" height="24"
+                    class="d-inline-block align-text-top">
+                <span class="ms-1 fw-bold">Todo App</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Main Navigation -->
+    <div class="sidebar-nav flex-grow-1">
+        <ul class="nav flex-column">
+            {% set endpoint = request.endpoint %}
+            {% set path = request.path %}
+            {% for tab in tabs %}
+            {{ tab_item(
+                name=tab['name'],
+                url=url_for(tab['url']),
+                icon=tab['icon'],
+                active= endpoint == tab['url'] and path == url_for(tab['url'])
+            ) }}
+            {% if tab.get('children') %}
+            <ul class="nav flex-column sub-tab">
+                {% for child in tab['children'] %}
+                {{ tab_item(
+                    name=child['name'],
+                    url=url_for(child['url']),
+                    icon=child['icon'],
+                    active= endpoint == child['url'] and path == url_for(child['url'])
+                ) }}
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="sidebar-footer border-top">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="{{ url_for('settings.settings') }}"
+                    class="nav-link {{ 'active' if request.path == url_for('settings.settings') and request.endpoint == 'settings.settings' }}">
+                    <i class="fas fa-cog"></i>
+                    <span class="ms-2">Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="ms-2">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endmacro %}

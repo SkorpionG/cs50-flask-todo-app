@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+{% from 'macros/form/auth.html' import email_input, password_input, remember_me %}
+<main id="login-page" class="auth-page">
+    {% include 'components/header.html' %}
+    <div id="login-container" class="d-flex justify-content-center align-items-center auth-container">
+        <form id="login-form" class="w-100 mx-auto needs-validation bg-body-tertiary p-4 rounded my-5" novalidate
+            method="POST" action="{{ url_for('auth.login') }}">
+            <h1 class="py-3 text-center">Login</h1>
+            <div class="mb-3">
+                {{ email_input(validation_message="Please enter your email address.", custom_validation="off", placeholder="yourname@example.com") }}
+            </div>
+            <div class="mb-3">
+                {{ password_input(validation_message="Please enter your password.", custom_validation="off") }}
+                <div id="password-reset" class="form-text">Forget your password? <a href="#">Reset it here</a></div>
+            </div>
+            <div class="mb-3 form-check">
+                {{ remember_me() }}
+            </div>
+            <button type="submit" class="w-100 btn btn-primary">Login</button>
+            <div id="account-help" class="form-text">Don't have an account? <a
+                    href="{{ url_for('auth.register') }}">Register here</a></div>
+        </form>
+    </div>
+</main>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

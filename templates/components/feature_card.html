@@ -1,0 +1,17 @@
+{% macro feature_card(title, description, icon_path, icon_alt, link_text="Learn more", link="/register") %}
+<div class="feature col my-4">
+    <div class="d-inline-flex align-items-center justify-content-center  my-3">
+        <img src="{{ url_for('static', filename=icon_path) }}" alt="{{ icon_alt }}" width="30" height="30">
+    </div>
+    <h3 class="fs-2 text-body-emphasis">{{ title }}</h3>
+    <p>{{ description }}</p>
+    <a href="{{ link }}" class="icon-link icon-link-hover">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+        </svg>
+        {{ link_text }}
+    </a>
+</div>
+{% endmacro %}

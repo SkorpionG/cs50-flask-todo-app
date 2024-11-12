@@ -1,0 +1,5 @@
+Flask
+Flask-Session
+email-validator
+python-dotenv
+Werkzeug

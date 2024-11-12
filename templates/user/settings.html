@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% from 'macros/sidebar.html' import sidebar %}
+{% from 'macros/user_settings.html' import user_settings %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main id="dashboard">
+    {{ sidebar(tabs=dashboard_tabs) }}
+    <div class="main-content p-4">
+        {{ user_settings(user=user) }}
+    </div>
+</main>
+{% endblock %}

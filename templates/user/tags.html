@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% from 'macros/sidebar.html' import sidebar %}
+{% from 'macros/quick_add.html' import quick_add %}
+{% from 'macros/tag_table.html' import tag_table %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main id="dashboard">
+    {{ sidebar(tabs=dashboard_tabs) }}
+    <div class="main-content p-4">
+        <!-- Your main content here -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Tags</h2>
+        </div>
+        {{ tag_table(tags=user_tags,
+        columns=tag_columns) }}
+
+        {{ quick_add() }}
+    </div>
+</main>
+{% endblock %}

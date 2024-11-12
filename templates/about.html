@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% from 'components/feature_card.html' import feature_card %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+{% include 'components/header.html' %}
+<main>
+    <div class="container px-4 py-5">
+        <h2 class="pb-2 border-bottom">What is this app about?</h2>
+        <div class="row g-5 py-4 row-cols-1 row-cols-lg-3">
+            {{ feature_card(title="Stay Focused and Productive", description="Create, organize, and manage your tasks with features such as task prioritization (High, Medium,
+            Low), status tracking
+            (Pending, In Progress, Completed), due date setting, and custom tag management with color coding.", icon_path="assets/icons/clock-history.svg", icon_alt="clock-history", link_text="Get started")}}
+            {{ feature_card(title="Stay Organized", description="Efficiently organize your tasks through a comprehensive dashboard that displays upcoming tasks,
+            filter tasks based on
+            various criteria (status, priority, due date), sort tasks by different attributes, and mark tasks as
+            complete or move
+            them between different status states.", icon_path="assets/icons/archive.svg", icon_alt="archive")}}
+            {{ feature_card(title="Full Control", description="Provides a user account management features, including the ability to customize personal information,
+            and offers a
+            dedicated completed tasks section to review finished work, all while maintaining a clean and
+            intuitive interface for
+            managing task-tag relationships and viewing task details.", icon_path="assets/icons/toggles.svg", icon_alt="switch", link_text="Register")}}
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,109 @@
+/* This implementation provides:
+1. Different styles for different types of messages (success, danger, warning, info)
+2. Animated entrance and exit
+3. Auto-dismissal after 5 seconds
+4. Manual close button
+5. Responsive design
+6. Stacked messages if multiple are shown
+7. Fixed positioning in the top-right corner
+
+You can customize the:
+1. Position by modifying the .flash-messages CSS
+2. Colors by modifying the
+.alert- {
+    category
+}
+CSS classes
+3. Animation duration by modifying the JavaScript setTimeout values and CSS animation durations
+4. Message width by modifying the max-width in .flash-messages
+*/
+
+/* Flash Messages Styles */
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+/* .alert {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-in-out;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alert-dismissible {
+    padding-right: 4rem;
+} */
+
+/* .btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+    color: inherit;
+    border: 0;
+    cursor: pointer;
+} */
+
+.alert-error {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Optional: Add fade out animation */
+.alert.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}

@@ -1,0 +1,74 @@
+{% from 'macros/form/auth.html' import username_input, email_input, password_input %}
+
+{% macro profile_settings(username, email) %}
+<div class="setting-section">
+    <h2 class="mb-3">Profile Settings</h2>
+    <form method="POST" action="{{ url_for('settings.update_profile') }}" class="needs-validation" novalidate>
+        <div class="mb-3">
+            {{ email_input(value=email, required=True, validation_message="Please provide a email address.", custom_validation="on") }}
+        </div>
+        <div class="mb-3">
+            {{ username_input(value=username, required=True, validation_message="Please choose a username.", custom_validation="on") }}
+        </div>
+        <button id="update-profile-btn" type="submit" class="btn btn-primary mt-2" disabled>Save Updates</button>
+    </form>
+</div>
+{% endmacro %}
+
+{% macro password_settings() %}
+<div class="setting-section">
+    <h2 class="mb-3">Password Settings</h2>
+    <form method="POST" action="{{ url_for('settings.update_password') }}" class="needs-validation" novalidate>
+        <div class="mb-3">
+            {{ password_input(name="current-password", label="Current Password", required=True, validation_message="Please enter your current password.", placeholder="Current Password", custom_validation="on") }}
+        </div>
+        <div class="mb-3">
+            {{ password_input(name="new-password", label="New Password", required=True, validation_message="Please set your new password.", tooltip_text="Make a password between 8 and 40 characters long", info_icon=True, info_text="You cannot set your new password to your old password, and your password should meet the password requirements.", placeholder="New Password", custom_validation="on", validation_info="on", bind_validation=True) }}
+        </div>
+        <div class="mb-3">
+            {{ password_input(name="confirm-password", label="Confirm New Password", required=True, validation_message="Please confirm your new password.", placeholder="Confirm New Password", tooltip_text="Make sure to save your new password.", custom_validation="on", type="confirm") }}
+        </div>
+        <div id="password-validation-info" class="form-text d-flex align-items-center flex-column text-center">
+        </div>
+        <button id="update-password-btn" type="submit" class="btn btn-primary mt-2">Update Password</button>
+    </form>
+</div>
+{% endmacro %}
+
+{% macro delete_account() %}
+<div class="card border-danger mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Danger Zone: Delete Account</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning alert-static">
+            <strong>Warning!</strong> This action cannot be undone. All your data will be permanently deleted.
+        </div>
+        <form id="delete-account-form" action="{{ url_for('settings.delete_account') }}" method="POST"
+            class="needs-validation" novalidate onsubmit="return confirmDelete()">
+            <div class="mb-3">
+                {{ password_input(
+                    name="delete-account-password",
+                    label="Confirm Password",
+                    validation_message="Please enter your password to delete your account.",
+                    placeholder="Confirm Password",
+                    required=true
+                ) }}
+            </div>
+            <button type="submit" class="btn btn-danger">
+                Delete Account
+            </button>
+        </form>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro user_settings(user) %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+<div class="d-flex gap-3 setting-container">
+    {{ profile_settings(username=user['username'], email=user['email']) }}
+    {{ password_settings() }}
+</div>
+{{ delete_account() }}
+{% endmacro %}

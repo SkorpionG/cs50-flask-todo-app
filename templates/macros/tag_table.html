@@ -1,0 +1,45 @@
+{% macro tag_table(tags, columns) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data_table.css') }}">
+<script src="{{ url_for('static', filename='js/data_table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+
+<div class="data-table-container" id="tag-table">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr class="text-center">
+                    {% for col in columns %}
+                    <th>{{ col.label }}</th>
+                    {% endfor %}
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tag in tags %}
+                <tr data-id="{{ tag.id }}" onclick="window.location.href='/tags/{{ tag.id }}/edit'" class="data-row">
+                    {% for col in columns %}
+                    <td class="data-cell">
+                        {% if col.type == 'date' %}
+                        {{ tag[col.key]|format_datetime }}
+                        {% elif col.type == 'color' %}
+                        <span class="badge" data-bg-color="{{ tag[col.key] }}">{{ tag[col.key] }}</span>
+                        {% else %}
+                        {{ tag[col.key] }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td>
+                        <form action="{{ url_for('tags.delete_tag', tag_id=tag.id) }}" method="POST">
+                            <input type="hidden" name="tag-id" value="{{ tag.id }}">
+                            <button title="Delete" class="btn btn-sm btn-danger remove-tag" type="submit">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}

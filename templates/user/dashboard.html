@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% from 'macros/sidebar.html' import sidebar %}
+{% from 'macros/quick_add.html' import quick_add %}
+{% from 'macros/task_table.html' import task_table %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main id="dashboard">
+    {{ sidebar(tabs=dashboard_tabs) }}
+    <div class="main-content p-4">
+        <!-- Your main content here -->
+        <h1 class="h2">Welcome back, {{ user.username }}</h1>
+
+        <div>
+            <h2 class="text-center h3 my-2">Not Due Yet</h2>
+            {{ task_table(tasks=tasks, columns=task_columns, task_action_info=task_action_info, toolbar=False) }}
+        </div>
+
+        <!-- For tasks table -->
+
+        {{ quick_add() }}
+    </div>
+</main>
+{% endblock %}

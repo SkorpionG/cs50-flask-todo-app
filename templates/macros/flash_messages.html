@@ -1,0 +1,16 @@
+{% macro flash_messages() %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flash_messages.css') }}">
+<script src="{{ url_for('static', filename='js/flash_messages.js') }}"></script>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-messages">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endmacro %}

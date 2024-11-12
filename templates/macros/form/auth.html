@@ -1,0 +1,63 @@
+{% macro username_input(name="username", label="Username", value="", required=True, validation_message="", disabled=False, placeholder="Enter your username", tooltip_text="", custom_validation="off") %}
+<div>
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <div class="input-group" data-bs-toggle="tooltip" {% if tooltip_text != ''%}data-bs-title="{{ tooltip_text }}"
+        {% endif %}>
+        <span class="input-group-text" id="inputGroupPrepend">@</span>
+        <input type="text" class="form-control rounded-end" id="{{ name }}" name="{{ name }}" value="{{ value }}"
+            placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %}
+            custom-validation="{{ custom_validation }}" input-type="username">
+        {% if required %}
+        <div class="invalid-feedback">
+            {{ validation_message }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro email_input(name="email", label="Email", value="", required=True, validation_message="", disabled=False, placeholder="Enter your username", tooltip_text="", custom_validation="off") %}
+<div>
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <input {% if tooltip_text != ''%}data-bs-title="{{ tooltip_text }}" {% endif %} placeholder="{{ placeholder }}"
+        type="email" class="form-control" id="{{ name }}" autocomplete="email" name="{{ name }}" value="{{ value }}"
+        {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} data-bs-toggle="tooltip"
+        custom-validation="{{ custom_validation }}" input-type="email">
+    {% if required %}
+    <div class="invalid-feedback">
+        {{ validation_message }}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro password_input(name="password", label="Password", value="", required=True, validation_message="", disabled=False, placeholder="Enter your password", tooltip_text="", info_icon=False, info_text="", minlength="8", maxlength="40", custom_validation="off", validation_info="off", type="password", bind_validation=False) %}
+<div>
+    <label for="{{ name }}" class="form-label d-flex align-items-center gap-2">{{ label }} {% if info_icon %}<svg
+            style="cursor: help;" data-bs-toggle="tooltip" {% if info_text != ''%}data-bs-title="{{ info_text }}"
+            {% endif %} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+            <path
+                d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+        </svg>{% endif %}</label>
+    <input type="password" class="form-control" id="{{ name.replace('_', '-') }}" name="{{ name }}" value="{{ value }}"
+        {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} placeholder="{{ placeholder }}"
+        data-bs-toggle="tooltip" {% if tooltip_text != ''%}data-bs-title="{{ tooltip_text }}" {% endif %}
+        minlength="{{ minlength }}" maxlength="{{ maxlength }}" custom-validation="{{ custom_validation }}"
+        password-input-type="{{ type }}" validation-info="{{ validation_info }}"
+        {% if bind_validation or type == 'confirm'%}bind-validation="true" {% endif %}>
+    {% if required %}
+    <div class="invalid-feedback">
+        {{ validation_message }}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro remember_me(required=False, name='keep-logged-in', label='Keep me logged in') %}
+<div>
+    <input type="checkbox" class="form-check-input" id="{{ name }}" name="{{ name }}">
+    <label class="form-check-label" for="{{ name }}">{{ label }}</label>
+</div>
+{% endmacro %}

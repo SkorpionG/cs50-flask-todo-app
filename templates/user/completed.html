@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% from 'macros/sidebar.html' import sidebar %}
+{% from 'macros/quick_add.html' import quick_add %}
+{% from 'macros/task_table.html' import task_table %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main id="dashboard">
+    {{ sidebar(tabs=dashboard_tabs) }}
+    <div class="main-content p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Completed Tasks</h2>
+        </div>
+        {{ task_table(tasks=tasks, columns=completed_columns, toolbar=False, task_action_info=task_action_info) }}
+
+        {{ quick_add(tags=tags) }}
+    </div>
+</main>
+{% endblock %}

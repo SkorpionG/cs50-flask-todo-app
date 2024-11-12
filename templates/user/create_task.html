@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% from 'macros/sidebar.html' import sidebar %}
+{% from 'macros/task_form.html' import task_form %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main id="dashboard">
+    {{ sidebar(tabs=dashboard_tabs) }}
+
+    {{ task_form(tags=user_tags) }}
+</main>
+{% endblock %}

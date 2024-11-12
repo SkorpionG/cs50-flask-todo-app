@@ -1,0 +1,137 @@
+{% macro task_action(action_type, action_info, task_id)%}
+{% set title = 'Mark as ' + action_type.title() %}
+<form action="{{ url_for('tasks.update_status', task_id=task_id) }}" method="POST">
+    <input type="hidden" name="task-id" value="{{ task_id }}">
+    <input type="hidden" name="status" value="{{ action_type }}">
+    <button type="submit" class="btn btn-sm {{ action_info[action_type]['color'] }}" title="{{ title }}"
+        data-bs-toggle="tooltip" data-bs-title="{{ title }}">
+        <i class="fas {{ action_info[action_type]['icon'] }}"></i>
+    </button>
+</form>
+{% endmacro %}
+
+{% macro task_delete(task_id) %}
+<form action="{{ url_for('tasks.delete_task', task_id=task_id) }}" method="POST">
+    <input type="hidden" name="task-id" value="{{ task_id }}">
+    <button type="submit" class="btn btn-sm btn-danger remove-task" title="Delete task" data-bs-toggle="tooltip"
+        data-bs-title="Delete task">
+        <i class="fas fa-trash"></i>
+    </button>
+</form>
+{% endmacro %}
+
+{% macro task_actions(task, task_action_info) %}
+<div class="d-flex gap-1 justify-content-center">
+    {% if task.status == 'Completed' %}
+    {{ task_action('In Progress', task_action_info, task.id) }}
+    {{ task_action('Pending', task_action_info, task.id) }}
+    {% else %}
+    {% if task.status == 'Pending' %}
+    {{ task_action('In Progress', task_action_info, task.id) }}
+    {% else %}
+    {{ task_action('Pending', task_action_info, task.id) }}
+    {% endif %}
+    {{ task_action('Completed', task_action_info, task.id) }}
+    {% endif %}
+    {{ task_delete(task.id) }}
+</div>
+{% endmacro %}
+
+
+{% macro task_table(tasks, columns, toolbar=True, task_action_info={}) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data_table.css') }}">
+<script src="{{ url_for('static', filename='js/data_table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+
+<div class="data-table-container" id="task-table">
+    {% if toolbar %}
+    {{ table_toolbar() }}
+    {% endif %}
+
+    <div class="table-responsive">
+        <!-- table-striped table-striped-columns -->
+        <table class="table table-hover">
+            <thead>
+                <tr class="text-center">
+                    {% for col in columns %}
+                    <th id="col-{{ col.key.replace('_', '-') }}">{{ col.label }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr data-id="{{ task.id }}" onclick="window.location.href='/tasks/{{ task.id }}/edit'" class="data-row">
+                    {% for col in columns %}
+                    <td data-field="{{ col.key }}" class="data-cell">
+                        {% if col.type == 'date' %}
+                        {% if not task[col.key].strip() and col.key == 'due_date' %}No Due Date{% else %}
+                        {{ task[col.key] | format_datetime }}
+                        {% endif %}
+                        {% elif col.type == 'select' %}
+                        <span class="badge bg-{{ task[col.key]|lower|replace(' ', '-') }}">{{ task[col.key] }}</span>
+                        {% elif col.type == 'tags' %}
+                        <div class="tags-container">
+                            {% if task.tags %}
+                            {% for tag in task.tags %}
+                            <span class="badge" data-bg-color="{{ tag.color }}">
+                                <a href="{{ url_for('tags.edit_tag', tag_id=tag.id)}}">{{ tag.name }}</a>
+                            </span>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ task[col.key] }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td>
+                        {{ task_actions(task, task_action_info) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro table_toolbar() %}
+<div class="table-toolbar mb-2 pb-4 d-flex justify-content-between align-items-center" id="table-toolbar">
+    <div class="d-flex justify-content-between align-items-center w-100 gap-2">
+        <!-- Filters -->
+        <div class="filter-section">
+            <select title="Status" class="form-select form-select-sm" id="status-filter">
+                <option value="">Status</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <select title="Priority" class="form-select form-select-sm" id="priority-filter">
+                <option value="">Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <input title="Created Date" type="date" class="form-control form-select-sm" id="date-filter">
+            <input title="Search" type="text" class="form-control form-select-sm" id="search-input"
+                placeholder="Search...">
+        </div>
+
+        <!-- Sort -->
+        <div class="sort-section">
+            <select title="Sort By" class="form-select form-select-sm" id="sort-field">
+                <option value="due_date">Sort by Due Date</option>
+                <option value="priority">Sort by Priority</option>
+                <option value="status">Sort by Status</option>
+                <option value="created_at">Sort by Created Date</option>
+            </select>
+            <button title="Sort" class="btn btn-outline-secondary btn-sm" id="sort-direction" data-direction="asc">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+{% endmacro %}

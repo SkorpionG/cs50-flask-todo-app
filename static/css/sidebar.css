@@ -1,0 +1,64 @@
+/* Sidebar Styles */
+
+#dashboard {
+    --sidebar-width: 200px;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+}
+
+.sidebar {
+    height: 100vh;
+    width: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.sidebar .nav-link {
+    padding: 0.8rem 1.5rem;
+    color: var(--bs-gray-700);
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--bs-gray-100);
+    color: var(--bs-primary);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+    font-weight: 500;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 0;
+}
+
+/* Icon alignment */
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+.sub-tab .nav-link {
+    padding: 0.4rem 0 0.4rem 2.5rem;
+}

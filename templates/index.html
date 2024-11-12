@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+{% include 'components/header.html' %}
+<main>
+    <div class="px-4 py-5 my-5 text-center">
+        <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Web App Logo"
+            width="64" height="64">
+        <h1 class="fw-bold mb-3">Flask Todo App</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">A simple todo app built with Flask and Bootstrap</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="/register" class="btn btn-primary btn-lg px-4">Get Started</a>
+                <a href="/about" class="btn btn-outline-secondary btn-lg px-4">Learn more</a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
