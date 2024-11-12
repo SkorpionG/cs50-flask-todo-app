@@ -15,6 +15,12 @@
                 </tr>
             </thead>
             <tbody>
+                {% if not tasks %}
+                <tr>
+                    <td class="text-center" colspan="{{ columns|length + 1 }}">No tags found. Create a new tag <a
+                            href="{{ url_for('tags.create_tag') }}">here</a>.</td>
+                </tr>
+                {% endif %}
                 {% for tag in tags %}
                 <tr data-id="{{ tag.id }}" onclick="window.location.href='/tags/{{ tag.id }}/edit'" class="data-row">
                     {% for col in columns %}

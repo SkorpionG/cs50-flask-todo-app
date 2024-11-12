@@ -45,11 +45,13 @@ class TaskTable {
         }
       );
       const sortCols = this.container.querySelectorAll("th");
-      // console.log(sortOptions);
-      // console.log(sortCols);
       sortCols.forEach((col) => {
         if (sortOptions.includes(col.id)) {
-          console.log(col.id);
+          col.setAttribute("data-bs-toggle", "tooltip");
+          col.setAttribute(
+            "data-bs-title",
+            `Click to sort by ${col.innerText}`
+          );
           col.addEventListener("click", () => {
             this.toggleSortDirection();
             this.applySort(col.id.replace("col-", ""));
@@ -120,7 +122,10 @@ class TaskTable {
       this.container.querySelector("#priority-filter")?.value;
     const dateFilter = this.container.querySelector("#date-filter")?.value;
 
-    const rows = this.container.querySelectorAll("tbody tr");
+    const rows = this.container.querySelectorAll(
+      "tbody tr:not([id='no-results'])"
+    );
+    let totalHideCount = 0;
 
     rows.forEach((row) => {
       let show = true;
@@ -163,8 +168,19 @@ class TaskTable {
         }
       }
 
+      if (!show) {
+        totalHideCount++;
+      }
+
       row.style.display = show ? "" : "none";
     });
+
+    const noResults = this.container.querySelector("#no-results");
+    if (totalHideCount === rows.length) {
+      noResults.classList.remove("d-none");
+    } else {
+      noResults.classList.add("d-none");
+    }
 
     this.savePreferences();
   }

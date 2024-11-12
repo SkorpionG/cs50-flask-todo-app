@@ -60,6 +60,16 @@
                 </tr>
             </thead>
             <tbody>
+                <tr class="d-none" id="no-results">
+                    <td class="text-center" colspan="{{ columns|length + 1 }}">No tasks found with given
+                        criteria.</td>
+                </tr>
+                {% if not tasks %}
+                <tr>
+                    <td class="text-center" colspan="{{ columns|length + 1 }}">No tasks found with given criteria.
+                        Create a new task <a href="{{ url_for('tasks.create_task') }}">here</a>.</td>
+                </tr>
+                {% endif %}
                 {% for task in tasks %}
                 <tr data-id="{{ task.id }}" onclick="window.location.href='/tasks/{{ task.id }}/edit'" class="data-row">
                     {% for col in columns %}
@@ -126,7 +136,8 @@
                 <option value="status">Sort by Status</option>
                 <option value="created_at">Sort by Created Date</option>
             </select>
-            <button title="Sort" class="btn btn-outline-secondary btn-sm" id="sort-direction" data-direction="asc">
+            <button title="Sort Direction" class="btn btn-outline-secondary btn-sm" id="sort-direction"
+                data-direction="asc" data-bs-toggle="tooltip" data-bs-title="Sort Direction">
                 <div class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
