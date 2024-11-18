@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% from 'macros/sidebar.html' import sidebar %}
-{% from 'macros/quick_add.html' import quick_add %}
-{% from 'macros/task_table.html' import task_table %}
+{% from 'macros/quick-add.html' import quick_add %}
+{% from 'macros/task-table.html' import task_table %}
 
 {% block head %}
 {% endblock %}
@@ -18,7 +18,7 @@
         </div>
 
         <!-- For tasks table -->
-        {{ task_table(tasks=tasks, columns=task_columns, task_action_info=task_action_info) }}
+        {{ task_table(tasks=tasks, columns=task_columns, task_action_info=task_action_info, user_tags=user_tags) }}
 
         {{ quick_add() }}
     </div>

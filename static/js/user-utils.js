@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
       e.stopPropagation();
       e.preventDefault();
       const form = button.closest("form");
+      if (!form && !form.classList.contains("delete-form")) {
+        return;
+      }
       const message = button.classList.contains("remove-task")
         ? "Are you sure you want to delete this task?"
         : "Are you sure you want to delete this tag?";

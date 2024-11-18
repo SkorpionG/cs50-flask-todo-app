@@ -131,7 +131,7 @@ def forgot_password():
 
         if not email or not validate_email(email):
             flash('Please provide a valid email address')
-            return render_template('auth/forgot_password.html')
+            return render_template('auth/forgot-password.html')
 
         # Here you would typically:
         # 1. Generate a reset token
@@ -142,4 +142,4 @@ def forgot_password():
         flash('If an account exists with that email, you will receive password reset instructions')
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/forgot_password.html', page_title='Forgot Password')
+    return render_template('auth/forgot-password.html', page_title='Forgot Password')

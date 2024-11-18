@@ -43,7 +43,7 @@ def tags():
 @login_required
 def create_tag():
     if request.method == 'GET':
-        return render_template('user/create_tag.html', page_title='Create a new tag')
+        return render_template('user/create-tag.html', page_title='Create a new tag')
     name = request.form.get('name')
     color = request.form.get('color', '#6c757d')
 
@@ -134,7 +134,7 @@ def edit_tag(tag_id):
             db.commit()
             flash('Tag updated successfully!', 'success')
             db.close()
-            return redirect(url_for('tags.tags'))
+            return redirect(request.referrer or url_for('tags.tags'))
         except sqlite3.Error as e:
             flash('Failed to update tag', 'danger')
             print(f"Database error: {e}")
@@ -144,7 +144,7 @@ def edit_tag(tag_id):
         flash('Tag not found', 'danger')
         return redirect(request.referrer or url_for('tags.tags'))
 
-    return render_template('user/edit_tag.html', tag=tag, page_title='Edit Tag')
+    return render_template('user/edit-tag.html', tag=tag, page_title='Edit Tag')
 
 
 @tags_bp.route('/tags/<int:tag_id>/delete', methods=['POST'])

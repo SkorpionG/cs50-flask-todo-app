@@ -1,6 +1,6 @@
 {% macro flash_messages() %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/flash_messages.css') }}">
-<script src="{{ url_for('static', filename='js/flash_messages.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flash-messages.css') }}">
+<script src="{{ url_for('static', filename='js/flash-messages.js') }}"></script>
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <div class="flash-messages">

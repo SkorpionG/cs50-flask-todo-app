@@ -1,7 +1,7 @@
 {% macro tag_table(tags, columns) %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/data_table.css') }}">
-<script src="{{ url_for('static', filename='js/data_table.js') }}"></script>
-<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data-table.css') }}">
+<script src="{{ url_for('static', filename='js/task-table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user-utils.js') }}"></script>
 
 <div class="data-table-container" id="tag-table">
     <div class="table-responsive">
@@ -15,7 +15,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% if not tasks %}
+                {% if not tags %}
                 <tr>
                     <td class="text-center" colspan="{{ columns|length + 1 }}">No tags found. Create a new tag <a
                             href="{{ url_for('tags.create_tag') }}">here</a>.</td>
@@ -35,7 +35,7 @@
                     </td>
                     {% endfor %}
                     <td>
-                        <form action="{{ url_for('tags.delete_tag', tag_id=tag.id) }}" method="POST">
+                        <form action="{{ url_for('tags.delete_tag', tag_id=tag.id) }}" method="POST" class="delete-form">
                             <input type="hidden" name="tag-id" value="{{ tag.id }}">
                             <button title="Delete" class="btn btn-sm btn-danger remove-tag" type="submit">
                                 <i class="fas fa-trash"></i>

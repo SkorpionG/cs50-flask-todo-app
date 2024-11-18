@@ -3,8 +3,76 @@ dayjs.extend(window.dayjs_plugin_customParseFormat);
 class TaskTable {
   constructor(container) {
     this.container = container;
+    this.settingKey = "taskTablePreferences";
     this.setupEventListeners();
     this.loadSavedPreferences();
+    this.setupTagFiltering();
+  }
+
+  // static resetSettings() {
+  //   localStorage.removeItem(this.settingKey);
+  //   const taskTable = document.querySelector("#task-table");
+  //   if (taskTable) {
+  //     const taskTableInstance = new TaskTable(taskTable);
+  //     taskTableInstance.loadSavedPreferences();
+  //   }
+  // }
+
+  static clearSettings() {
+    localStorage.removeItem(this.settingKey);
+  }
+
+  setupTagFiltering() {
+    // Prevent dropdown from closing when clicking inside
+    const tagFilterMenu = this.container.querySelector("#tag-filter-menu");
+    if (tagFilterMenu) {
+      tagFilterMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+
+      // Setup select/clear all buttons
+      const selectAllBtn = tagFilterMenu.querySelector("#select-all-tags");
+      const clearAllBtn = tagFilterMenu.querySelector("#clear-all-tags");
+
+      if (selectAllBtn) {
+        selectAllBtn.addEventListener("click", () => {
+          const checkboxes = tagFilterMenu.querySelectorAll(
+            ".tag-filter-checkbox"
+          );
+          checkboxes.forEach((cb) => (cb.checked = true));
+          this.applyFilters();
+        });
+      }
+
+      if (clearAllBtn) {
+        clearAllBtn.addEventListener("click", () => {
+          const checkboxes = tagFilterMenu.querySelectorAll(
+            ".tag-filter-checkbox"
+          );
+          checkboxes.forEach((cb) => (cb.checked = false));
+          this.applyFilters();
+        });
+      }
+
+      // Setup individual checkboxes
+      const checkboxes = tagFilterMenu.querySelectorAll(".tag-filter-checkbox");
+      checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          this.applyFilters();
+          this.updateTagFilterIndicator();
+        });
+      });
+    }
+  }
+
+  updateTagFilterIndicator() {
+    const dropdown = this.container.querySelector("#tag-filter-dropdown");
+    const checkboxes = this.container.querySelectorAll(".tag-filter-checkbox");
+    const hasSelected = Array.from(checkboxes).some((cb) => cb.checked);
+
+    if (dropdown) {
+      dropdown.classList.toggle("has-selected", hasSelected);
+    }
   }
 
   toggleSortDirection() {
@@ -13,7 +81,6 @@ class TaskTable {
       sortButton.dataset.direction === "asc" ? "desc" : "asc";
     sortButton.dataset.direction = newDirection;
     this.updateSortIcon(sortButton, newDirection);
-    // this.applySort();
   }
 
   setupEventListeners() {
@@ -60,6 +127,7 @@ class TaskTable {
       });
     }
     if (sortDirection) {
+      this.toggleSortDirection();
       sortDirection.addEventListener("click", (e) => {
         this.toggleSortDirection();
         this.applySort();
@@ -122,6 +190,10 @@ class TaskTable {
       this.container.querySelector("#priority-filter")?.value;
     const dateFilter = this.container.querySelector("#date-filter")?.value;
 
+    const selectedTagIds = Array.from(
+      this.container.querySelectorAll(".tag-filter-checkbox:checked")
+    ).map((cb) => cb.value);
+
     const rows = this.container.querySelectorAll(
       "tbody tr:not([id='no-results'])"
     );
@@ -166,6 +238,17 @@ class TaskTable {
               dueDate.toLocaleDateString() === filterDate.toLocaleDateString();
           }
         }
+      }
+
+      // Tag filtering
+      if (selectedTagIds.length > 0) {
+        const tagElements = row.querySelectorAll('[data-field="tags"] .badge');
+        const rowTagIds = Array.from(tagElements).map(
+          (tag) => tag.dataset.tagId // Make sure your tags have data-tag-id attribute
+        );
+
+        // Show row only if it has at least one selected tag
+        show = show && selectedTagIds.some((id) => rowTagIds.includes(id));
       }
 
       if (!show) {
@@ -257,7 +340,7 @@ class TaskTable {
 
   loadSavedPreferences() {
     const preferences = JSON.parse(
-      localStorage.getItem("taskTablePreferences") || "{}"
+      localStorage.getItem(this.settingKey) || "{}"
     );
 
     // Apply saved sort field
@@ -293,6 +376,19 @@ class TaskTable {
       if (priorityFilter && priority) priorityFilter.value = priority;
       if (dateFilter && date) dateFilter.value = date;
 
+      // Load tag filters
+      if (preferences.tagFilters) {
+        preferences.tagFilters.forEach((tagId) => {
+          const checkbox = this.container.querySelector(
+            `.tag-filter-checkbox[value="${tagId}"]`
+          );
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+        this.updateTagFilterIndicator();
+      }
+
       this.applyFilters();
     }
 
@@ -310,9 +406,12 @@ class TaskTable {
         priority: this.container.querySelector("#priority-filter")?.value,
         date: this.container.querySelector("#date-filter")?.value,
       },
+      tagFilters: Array.from(
+        this.container.querySelectorAll(".tag-filter-checkbox:checked")
+      ).map((cb) => cb.value),
     };
 
-    localStorage.setItem("taskTablePreferences", JSON.stringify(preferences));
+    localStorage.setItem(this.settingKey, JSON.stringify(preferences));
   }
 }
 
@@ -322,4 +421,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (taskTable && taskTable.querySelector("#table-toolbar")) {
     new TaskTable(taskTable);
   }
+
+  // const logoutButton = document.querySelector("#logout");
+  // if (logoutButton) {
+  //   logoutButton.addEventListener("click", (e) => {
+  //     TaskTable.clearSettings();
+  //   });
+  // }
 });

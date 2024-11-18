@@ -1,6 +1,6 @@
 {% macro task_form(tags, tag_ids, task, mode='create') %}
-<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
-<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user-utils.js') }}"></script>
 
 <div class="main-content p-4">
     <div class="modal-content">
@@ -10,23 +10,25 @@
         </div>
         <form method="POST"
             action="{{ url_for('tasks.create_task') if mode == 'create' else url_for('tasks.edit_task', task_id=task.id) if mode == 'edit' else '' }}"
-            class="modal-body needs-validation" novalidate>
+            class="needs-validation" novalidate id="task-form">
+        </form>
+        <div>
             <div class="mb-3">
-                <label for="task-title" class="form-label">Title</label>
+                <label for="task-title" class="form-label" form="task-form">Title</label>
                 <input type="text" class="form-control" id="task-title" name="title"
-                    value="{{ task.title if mode == 'edit' and task.title else '' }}">
+                    value="{{ task.title if mode == 'edit' and task.title else '' }}" form="task-form">
             </div>
 
             <div class="mb-3">
-                <label for="task-description" class="form-label">Description</label>
-                <textarea class="form-control" id="task-description" name="description"
-                    rows="3">{{ task.description if mode == 'edit' and task.description else '' }}</textarea>
+                <label for="task-description" class="form-label" form="task-form">Description</label>
+                <textarea class="form-control" id="task-description" name="description" rows="3"
+                    form="task-form">{{ task.description if mode == 'edit' and task.description else '' }}</textarea>
             </div>
 
             <div class="mb-3 d-flex justify-content-between gap-3">
                 <div class="mb-3 w-50">
-                    <label for="task-priority" class="form-label">Priority</label>
-                    <select class="form-select" id="task-priority" name="priority">
+                    <label for="task-priority" class="form-label" form="task-form">Priority</label>
+                    <select class="form-select" id="task-priority" name="priority" form="task-form">
                         <option value="Low" {% if mode == 'edit' and task.priority == 'Low' %}selected{% endif %}>Low
                         </option>
                         <option value="Medium" {% if mode == 'edit' and task.priority == 'Medium' %}selected{% endif %}>
@@ -37,8 +39,8 @@
                 </div>
 
                 <div class="mb-3 w-50">
-                    <label for="task-status" class="form-label">Status</label>
-                    <select class="form-select" id="task-status" name="status">
+                    <label for="task-status" class="form-label" form="task-form">Status</label>
+                    <select class="form-select" id="task-status" name="status" form="task-form">
                         <option value="Pending" {% if mode == 'edit' and task.status == 'Pending' %}selected{% endif %}>
                             Pending</option>
                         <option value="In Progress"
@@ -53,10 +55,10 @@
 
             <div class="mb-3 d-flex justify-content-between gap-3">
                 <div class="mb-3 w-50">
-                    <label for="task-tags" class="form-label">Tags</label>
+                    <label for="task-tags" class="form-label" form="task-form">Tags</label>
                     <select multiple data-bs-toggle="tooltip"
                         data-bs-title="Press the 'Shift' key to select multiple tags" class="form-select" id="task-tags"
-                        name="tags[]">
+                        name="tags[]" form="task-form">
                         {% for tag in tags %}
                         <option value="{{ tag.id }}" data-color="{{ tag.color }}"
                             {% if task and tag_ids and tag.id in tag_ids %}selected{% endif %}>{{ tag.name }}</option>
@@ -64,21 +66,24 @@
                     </select>
                 </div>
                 <div class="mb-3 w-50">
-                    <label for="task-due-date" class="form-label">Due Date</label>
+                    <label for="task-due-date" class="form-label" form="task-form">Due Date</label>
                     <input type="datetime-local" class="form-control" id="task-due-date" name="due-date"
-                        value="{% if mode == 'edit' and task.due_date %}{{ task.due_date }}{% endif %}">
+                        value="{% if mode == 'edit' and task.due_date %}{{ task.due_date }}{% endif %}"
+                        form="task-form">
                 </div>
             </div>
 
             <div class="modal-footer justify-content-center gap-3">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                <a class="btn btn-secondary" href="{{ url_for('tasks.tasks') }}">Cancel</a>
                 {% if mode == 'edit' %}
-                <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}">
-                    <input type="hidden" name="task-id" value="{{ task.id }}">
-                    <button type="submit" class="btn btn-danger remove-task">Delete Task</button>
+                <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}" id="delete-task-form"
+                    class="delete-form">
+                    <input type="hidden" name="task-id" value="{{ task.id }}" form="delete-task-form">
+                    <button type="submit" class="btn btn-danger remove-task" form="delete-task-form">Delete
+                        Task</button>
                 </form>
                 {% endif %}
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" form="task-form">
                     {% if mode == 'create' %}
                     Create Task
                     {% elif mode == 'edit' %}
@@ -86,7 +91,7 @@
                     {% endif %}
                 </button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endmacro %}

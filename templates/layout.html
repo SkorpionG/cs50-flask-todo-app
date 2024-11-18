@@ -26,24 +26,10 @@
 
     <body>
         <!-- Flash messages section -->
-        {% from 'macros/flash_messages.html' import flash_messages %}
+        {% from 'macros/flash-messages.html' import flash_messages %}
         {{ flash_messages() }}
 
         {% block content %}{% endblock %}
-        {% set debug = False %}
-        {% if debug %}
-        <div class="flash-messages">
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                Debug Message
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-        <h3>Endpoint: {{ request.endpoint }}</h3>
-        <h3>URL: {{ request.url }}</h3>
-        <h3>URL Root: {{ request.url_root }}</h3>
-        <h3>Base URL: {{ request.base_url }}</h3>
-        <h3>Path: {{ request.path }}</h3>
-        {% endif %}
         <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     </body>
 

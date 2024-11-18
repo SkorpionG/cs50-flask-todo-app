@@ -51,7 +51,7 @@ def validate_task(title, description, due_date, priority, status):
 @tasks_bp.route('/tasks')
 @login_required
 @with_context(
-    get=['task_columns'],
+    get=['task_columns', 'user_tags'],
 )
 def tasks():
     user_tasks = get_user_tasks(
@@ -73,7 +73,7 @@ def tasks():
 )
 def create_task():
     if request.method == 'GET':
-        return render_template('user/create_task.html', page_title='Create a new task')
+        return render_template('user/create-task.html', page_title='Create a new task')
 
     title = request.form.get('title')
     description = request.form.get('description')
@@ -228,7 +228,7 @@ def edit_task(task_id):
     """, (task_id,))
     current_tag_ids = [row['tag_id'] for row in cursor.fetchall()]
     db.close()
-    return render_template('user/edit_task.html', task=task, current_tag_ids=current_tag_ids, page_title='Edit Task')
+    return render_template('user/edit-task.html', task=task, current_tag_ids=current_tag_ids, page_title='Edit Task')
 
 
 @tasks_bp.route('/tasks/<int:task_id>/status', methods=['POST'])

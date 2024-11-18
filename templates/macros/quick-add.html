@@ -1,7 +1,7 @@
 {% macro quick_add(tags) %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/quick_add.css') }}">
-<script src="{{ url_for('static', filename='js/quick_add.js') }}"></script>
-<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quick-add.css') }}">
+<script src="{{ url_for('static', filename='js/quick-add.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
 
 <div class="fab-container">
     <!-- Main FAB -->
@@ -26,7 +26,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">Create New Task</h5>
-            <button title="Close" type="button" class="btn-close" data-modal-close="taskModal"></button>
+            <button title="Close" type="button" class="btn-close" data-modal-close="task-modal"></button>
         </div>
         <form method="POST" action="{{ url_for('tasks.create_task') }}" class="modal-body needs-validation" novalidate>
             <div class="mb-3">
@@ -76,7 +76,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-modal-close="taskModal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-modal-close="task-modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create Task</button>
             </div>
         </form>
@@ -88,7 +88,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">Create New Tag</h5>
-            <button title="Close" type="button" class="btn-close" data-modal-close="tagModal"></button>
+            <button title="Close" type="button" class="btn-close" data-modal-close="tag-modal"></button>
         </div>
         <form method="POST" action="{{ url_for('tags.create_tag') }}" class="modal-body needs-validation" novalidate>
             <div class="mb-3">
@@ -103,7 +103,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-modal-close="tagModal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-modal-close="tag-modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create Tag</button>
             </div>
         </form>

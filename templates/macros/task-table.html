@@ -11,7 +11,7 @@
 {% endmacro %}
 
 {% macro task_delete(task_id) %}
-<form action="{{ url_for('tasks.delete_task', task_id=task_id) }}" method="POST">
+<form action="{{ url_for('tasks.delete_task', task_id=task_id) }}" method="POST" class="delete-form">
     <input type="hidden" name="task-id" value="{{ task_id }}">
     <button type="submit" class="btn btn-sm btn-danger remove-task" title="Delete task" data-bs-toggle="tooltip"
         data-bs-title="Delete task">
@@ -38,14 +38,14 @@
 {% endmacro %}
 
 
-{% macro task_table(tasks, columns, toolbar=True, task_action_info={}) %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/data_table.css') }}">
-<script src="{{ url_for('static', filename='js/data_table.js') }}"></script>
-<script src="{{ url_for('static', filename='js/user_utils.js') }}"></script>
+{% macro task_table(tasks, columns, user_tags, toolbar=True, task_action_info={}) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data-table.css') }}">
+<script src="{{ url_for('static', filename='js/task-table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user-utils.js') }}"></script>
 
 <div class="data-table-container" id="task-table">
     {% if toolbar %}
-    {{ table_toolbar() }}
+    {{ table_toolbar(user_tags) }}
     {% endif %}
 
     <div class="table-responsive">
@@ -84,7 +84,7 @@
                         <div class="tags-container">
                             {% if task.tags %}
                             {% for tag in task.tags %}
-                            <span class="badge" data-bg-color="{{ tag.color }}">
+                            <span class="badge" data-bg-color="{{ tag.color }}" data-tag-id="{{ tag.id }}">
                                 <a href="{{ url_for('tags.edit_tag', tag_id=tag.id)}}">{{ tag.name }}</a>
                             </span>
                             {% endfor %}
@@ -106,7 +106,7 @@
 </div>
 {% endmacro %}
 
-{% macro table_toolbar() %}
+{% macro table_toolbar(user_tags) %}
 <div class="table-toolbar mb-2 pb-4 d-flex justify-content-between align-items-center" id="table-toolbar">
     <div class="d-flex justify-content-between align-items-center w-100 gap-2">
         <!-- Filters -->
@@ -126,6 +126,31 @@
             <input title="Created Date" type="date" class="form-control form-select-sm" id="date-filter">
             <input title="Search" type="text" class="form-control form-select-sm" id="search-input"
                 placeholder="Search...">
+
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="tag-filter-dropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Filter by Tags
+                </button>
+                <div class="dropdown-menu p-2" id="tag-filter-menu">
+                    <div class="tag-filter-list">
+                        {% for tag in user_tags %}
+                        <div class="form-check">
+                            <input class="form-check-input tag-filter-checkbox" type="checkbox" value="{{ tag.id }}"
+                                id="tag-{{ tag.id }}">
+                            <label class="form-check-label d-flex align-items-center" for="tag-{{ tag.id }}">
+                                <span class="badge me-2" data-bg-color="{{ tag.color }}">{{ tag.name }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="dropdown-divider position-relative"></div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-link" id="select-all-tags">Select All</button>
+                        <button type="button" class="btn btn-sm btn-link" id="clear-all-tags">Clear All</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Sort -->

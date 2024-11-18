@@ -55,13 +55,14 @@
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a href="{{ url_for('settings.settings') }}"
-                    class="nav-link {{ 'active' if request.path == url_for('settings.settings') and request.endpoint == 'settings.settings' }}">
+                    class="nav-link {{ 'active' if request.path == url_for('settings.settings') and request.endpoint == 'settings.settings' }}"
+                    id="account-settings">
                     <i class="fas fa-cog"></i>
                     <span class="ms-2">Settings</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+                <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger" id="logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="ms-2">Logout</span>
                 </a>
