@@ -57,3 +57,7 @@ Inside the database.db, there are 3 tables that are responsible for storing user
 - The **tasks** table store task related to user tasks. Each task is associated with one user and has a user_id field. The tasks table also stores the other various properties associated with a task.
 - The **tags** table store tags created by the users. Each tag is associated with one user and has a user_id field. The tags table also stores the name and color coding for each tag.
 - The **task_tags** table is a many to many relationship database that join the tasks and tags table. This is because each task can have many tags attached or connected, while each tags can be connected by multiple tasks.
+
+### Notes
+
+Before running the application, be sure to install all the required libraries (listed inside "requirements.txt") and run the init_db.py to initialize the database.
