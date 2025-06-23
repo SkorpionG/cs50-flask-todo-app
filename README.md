@@ -1,7 +1,5 @@
 # Flask Todo App
 
-## Video Demo: [https://youtu.be/bQE3Y_Th1NU](https://youtu.be/bQE3Y_Th1NU)
-
 ## Description
 
 ### About
