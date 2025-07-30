@@ -1,5 +1,36 @@
 # Flask Todo App
 
+## Running the Application
+
+To run the application, follow these steps:
+
+1. Clone the repository to your local machine.
+2. Install Python 3.x and pip if you haven't already.
+3. Optional: Install the `uv` Python package manager (see [installation guide](https://docs.astral.sh/uv/getting-started/installation/))
+4. Install the required libraries by running:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. Setting up the database by running the following command:
+
+   ```bash
+   python init_db.py
+   ```
+
+6. Run the app by running the following command:
+
+   ```bash
+   python app.py
+   ```
+
+   or
+
+    ```bash
+    uv run app.py
+    ```
+
 ## Description
 
 ### About

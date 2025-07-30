@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
-from flask import Flask, render_template, session, redirect, url_for, request, g
+from datetime import datetime
+from flask import Flask, render_template, session, url_for, request, g
 # import sqlite3
 import os
 # from functools import wraps
