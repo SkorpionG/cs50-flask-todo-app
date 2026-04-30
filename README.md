@@ -13,10 +13,22 @@ To run the application, follow these steps:
    pip install -r requirements.txt
    ```
 
+   If you are using `uv`, you can install dependencies and set up the environment by running:
+
+   ```bash
+   uv sync
+   ```
+
 5. Setting up the database by running the following command:
 
    ```bash
-   python init_db.py
+   python db.py
+   ```
+
+   or
+
+   ```bash
+   uv run db.py
    ```
 
 6. Run the app by running the following command:
@@ -27,9 +39,9 @@ To run the application, follow these steps:
 
    or
 
-    ```bash
-    uv run app.py
-    ```
+   ```bash
+   uv run app.py
+   ```
 
 ## Description
 
@@ -75,7 +87,7 @@ Most of the python files outside both the "static" and "templates" folders are a
 - The validation.py is where functions for email and password validation are defined.
 - The navigation.py stores several variables that tells the frontend what pages to display and the corresponding routes, name, and even icons associated with each page.
 - The middleware.py contains some flask middleware process the request before it reach the actual routes, such as the login_required middleware that make sure a specific page is only accessible to logged in users. These functions makes the backend code more reusable.
-- The init_db.py contain a function that will setup the database file after been executed. It will read the database schema from the **schema.sql**, connect to database.db (where all the user data is stored), drop existing databases if it exists, and recreate the database schema for all tables defined in schema.sql.
+- The db.py contains functions to setup the database file. When executed, it reads the database schemas from the **sql/schemas** directory, connects to database.db (where all the user data is stored), and can automatically initialize or drop and recreate the database schema for all tables.
 - The database.py contains many functions that make interacting with the database easier, and also makes the code to to so much reusable.
 
 ### Database
@@ -89,4 +101,4 @@ Inside the database.db, there are 3 tables that are responsible for storing user
 
 ### Notes
 
-Before running the application, be sure to install all the required libraries (listed inside "requirements.txt") and run the init_db.py to initialize the database.
+Before running the application, be sure to install all the required libraries and run `db.py` to initialize the database.

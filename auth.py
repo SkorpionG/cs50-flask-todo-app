@@ -1,6 +1,5 @@
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash
 import sqlite3
-import re
 from werkzeug.security import generate_password_hash, check_password_hash
 from validation import validate_email, validate_password
 from database import get_db

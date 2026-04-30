@@ -11,6 +11,9 @@ from auth import auth_bp
 from tasks import tasks_bp
 from tags import tags_bp
 from settings import settings_bp
+from db import auto_init_db
+
+auto_init_db()
 
 # Configure application
 app = Flask(__name__)
