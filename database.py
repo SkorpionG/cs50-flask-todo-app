@@ -1,13 +1,14 @@
-import sqlite3
 import re
+import sqlite3
 from datetime import datetime
+from typing import Any
 
-DB_NAME = 'database.db'
+DB_NAME = "database.db"
 
 # Database connection helper
 
 
-def get_db():
+def get_db() -> sqlite3.Connection:
     """
     Connects to the database file and returns a connection object.
 
@@ -22,72 +23,74 @@ def get_db():
     return db
 
 
-def get_task_columns():
+def get_task_columns() -> list[dict[str, Any]]:
     db = get_db()
     cursor = db.cursor()
     cursor.execute("PRAGMA table_info(tasks)")
     columns = cursor.fetchall()
     result = []
-    orders = {'title': 1, 'description': 2,
-              'priority': 3, 'status': 4, 'tags': 5, 'due_date': 6, 'created_at': 7, 'modified_at': 8}
+    orders = {
+        "title": 1,
+        "description": 2,
+        "priority": 3,
+        "status": 4,
+        "tags": 5,
+        "due_date": 6,
+        "created_at": 7,
+        "modified_at": 8,
+    }
     for column in columns:
-        if column[1] in ['created_at', 'modified_at', 'due_date']:
-            result.append({'key': column[1], 'label': column[1].title(
-            ).replace("_", " "), 'type': 'date'})
-        elif column[1] in ['priority', 'status']:
-            result.append(
-                {'key': column[1], 'label': column[1].title(), 'type': 'select'})
-        elif column[1] in ['user_id', 'id']:
+        if column[1] in ["created_at", "modified_at", "due_date"]:
+            result.append({"key": column[1], "label": column[1].title().replace("_", " "), "type": "date"})
+        elif column[1] in ["priority", "status"]:
+            result.append({"key": column[1], "label": column[1].title(), "type": "select"})
+        elif column[1] in ["user_id", "id"]:
             continue  # Skip id and user_id column in the output
         else:
-            result.append(
-                {'key': column[1], 'label': column[1].title(), 'type': 'text'})
-        result[len(result)-1]['order'] = orders.get(column[1], 0)
+            result.append({"key": column[1], "label": column[1].title(), "type": "text"})
+        result[len(result) - 1]["order"] = orders.get(column[1], 0)
 
     db.close()
-    result.append(
-        {'key': 'tags', 'label': 'Tags', 'type': 'tags', 'order': orders['tags']})
-    result.sort(key=lambda x: x['order'])
+    result.append({"key": "tags", "label": "Tags", "type": "tags", "order": orders["tags"]})
+    result.sort(key=lambda x: x["order"])
     return result
 
 
-def get_tag_columns():
+def get_tag_columns() -> list[dict[str, Any]]:
     db = get_db()
     cursor = db.cursor()
     cursor.execute("PRAGMA table_info(tags)")
     columns = cursor.fetchall()
     db.close()
     result = []
-    orders = {
-        'name': 1, 'color': 2, 'created_at': 3
-    }
+    orders = {"name": 1, "color": 2, "created_at": 3}
     for column in columns:
-        if column[1] in ['created_at']:
-            result.append({'key': column[1], 'label': column[1].title(
-            ).replace("_", " "), 'type': 'date'})
-        elif column[1] in ['user_id', 'id']:
+        if column[1] in ["created_at"]:
+            result.append({"key": column[1], "label": column[1].title().replace("_", " "), "type": "date"})
+        elif column[1] in ["user_id", "id"]:
             continue
         elif column[1] in ["color"]:
-            result.append(
-                {'key': column[1], 'label': column[1].title(), 'type': 'color'})
+            result.append({"key": column[1], "label": column[1].title(), "type": "color"})
         else:
-            result.append(
-                {'key': column[1], 'label': column[1].title(), 'type': 'text'})
-        result[len(result)-1]['order'] = orders[column[1]]
+            result.append({"key": column[1], "label": column[1].title(), "type": "text"})
+        result[len(result) - 1]["order"] = orders[column[1]]
 
-    result.sort(key=lambda x: x['order'])
+    result.sort(key=lambda x: x["order"])
     return result
 
 
-def get_user_tags(user_id):
+def get_user_tags(user_id: int) -> list[sqlite3.Row]:
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT *
         FROM tags
         WHERE user_id = ?
-    """, (user_id,))
+    """,
+        (user_id,),
+    )
 
     tags = cursor.fetchall()
     db.close()
@@ -95,21 +98,29 @@ def get_user_tags(user_id):
     return tags
 
 
-def get_user_tag(user_id, tag_id):
+def get_user_tag(user_id: int, tag_id: int) -> sqlite3.Row | None:
     db = get_db()
     cursor = db.cursor()
 
     # Get tag
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * FROM tags
         WHERE id = ? AND user_id = ?
-    """, (tag_id, user_id))
-    tag = cursor.fetchone()
+    """,
+        (tag_id, user_id),
+    )
+    tag: sqlite3.Row | None = cursor.fetchone()
     db.close()
     return tag
 
 
-def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None):
+def get_user_tasks(
+    user_id: int,
+    sort_column: str | None = None,
+    sort_direction: str = "asc",
+    filters: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     """
     Get user tasks with sorting and filtering capabilities.
 
@@ -144,17 +155,17 @@ def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None
             LEFT JOIN tags tag ON tt.tag_id = tag.id
             WHERE t.user_id = ?
         """
-        params = [user_id]
+        params: list[Any] = [user_id]
 
         # Add filters if provided
         if filters:
-            valid_operators = ['=', '!=', '<', '>', '<=', '>=', 'LIKE']
-            date_columns = ['due_date', 'created_at', 'modified_at']
+            valid_operators = ["=", "!=", "<", ">", "<=", ">=", "LIKE"]
+            date_columns = ["due_date", "created_at", "modified_at"]
 
             for filter_dict in filters:
-                column = filter_dict.get('column')
-                operator = filter_dict.get('operator', '=')
-                value = filter_dict.get('value')
+                column = filter_dict.get("column")
+                operator = filter_dict.get("operator", "=")
+                value = filter_dict.get("value")
 
                 if not all([column, operator, value]) or operator not in valid_operators:
                     continue
@@ -165,29 +176,26 @@ def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None
                         # Convert to consistent datetime format
                         if not isinstance(value, str):
                             continue
-                        if 'T' in value:
-                            value = datetime.strptime(value, '%Y-%m-%dT%H:%M')
+                        if "T" in value:
+                            value = datetime.strptime(value, "%Y-%m-%dT%H:%M")
                         else:
                             # Try different date formats
-                            date_formats = [
-                                '%Y-%m-%d %H:%M:%S',
-                                '%Y-%m-%d %H:%M',
-                                '%Y-%m-%d'
-                            ]
+                            date_formats = ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"]
                             for fmt in date_formats:
                                 try:
-                                    value = datetime.strptime(value, fmt)
-                                    break
+                                    if isinstance(value, str):
+                                        value = datetime.strptime(value, fmt)
+                                        break
                                 except ValueError:
                                     continue
-                        # Convert datetime back to string in SQLite format
-                        value = value.strftime('%Y-%m-%d %H:%M:%S')
+                        if not isinstance(value, str):
+                            value = value.strftime("%Y-%m-%d %H:%M:%S")
                     except ValueError:
                         continue
 
                 # Handle LIKE operator
-                if operator == 'LIKE':
-                    value = f'%{value}%'
+                if operator == "LIKE":
+                    value = f"%{value}%"
 
                 query += f" AND t.{column} {operator} ?"
                 params.append(value)
@@ -196,13 +204,10 @@ def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None
         query += " GROUP BY t.id"
 
         # Add sorting if provided
-        valid_sort_columns = [
-            'title', 'description', 'due_date', 'priority',
-            'status', 'created_at', 'modified_at'
-        ]
+        valid_sort_columns = ["title", "description", "due_date", "priority", "status", "created_at", "modified_at"]
 
         if sort_column and sort_column in valid_sort_columns:
-            sort_direction = 'DESC' if sort_direction.lower() == 'desc' else 'ASC'
+            sort_direction = "DESC" if sort_direction.lower() == "desc" else "ASC"
             query += f" ORDER BY t.{sort_column} {sort_direction}"
         else:
             # Default sorting by due date
@@ -217,21 +222,20 @@ def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None
             task_dict = dict(task)
 
             # Process tags
-            if task_dict['tag_names']:
-                names = task_dict['tag_names'].split(',')
-                colors = task_dict['tag_colors'].split(',')
-                ids = task_dict['tag_ids'].split(',')
-                task_dict['tags'] = [
-                    {'id': int(id), 'name': name, 'color': color}
-                    for id, name, color in zip(ids, names, colors)
+            if task_dict["tag_names"]:
+                names = task_dict["tag_names"].split(",")
+                colors = task_dict["tag_colors"].split(",")
+                ids = task_dict["tag_ids"].split(",")
+                task_dict["tags"] = [
+                    {"id": int(id), "name": name, "color": color} for id, name, color in zip(ids, names, colors)
                 ]
             else:
-                task_dict['tags'] = []
+                task_dict["tags"] = []
 
             # Remove the concatenated columns as they're no longer needed
-            del task_dict['tag_names']
-            del task_dict['tag_colors']
-            del task_dict['tag_ids']
+            del task_dict["tag_names"]
+            del task_dict["tag_colors"]
+            del task_dict["tag_ids"]
 
             tasks.append(task_dict)
 
@@ -244,36 +248,34 @@ def get_user_tasks(user_id, sort_column=None, sort_direction='asc', filters=None
         db.close()
 
 
-def get_column_constraints(table_name, column_name):
+def get_column_constraints(table_name: str, column_name: str) -> list[str]:
     db = get_db()
     cursor = db.cursor()
 
     # Get table info
-    cursor.execute(
-        "SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
-    create_sql = cursor.fetchone()['sql']
+    cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    create_sql = cursor.fetchone()["sql"]
 
     # Parse the CHECK constraint
-    constraint_pattern = fr"{
-        column_name} TEXT CHECK\({column_name} IN \((.+?)\)\)"
+    constraint_pattern = rf"{column_name} TEXT CHECK\({column_name} IN \((.+?)\)\)"
     match = re.search(constraint_pattern, create_sql)
 
     if match:
         # Extract values from the constraint
         values_str = match.group(1)
         # Convert "'High', 'Medium', 'Low'" to ['High', 'Medium', 'Low']
-        values = [val.strip("' ") for val in values_str.split(',')]
+        values = [val.strip("' ") for val in values_str.split(",")]
         return values
 
     return []
 
 
-def task_priority_options():
-    return get_column_constraints('tasks', 'priority')
+def task_priority_options() -> list[str]:
+    return get_column_constraints("tasks", "priority")
 
 
-def task_status_options():
-    return get_column_constraints('tasks', 'status')
+def task_status_options() -> list[str]:
+    return get_column_constraints("tasks", "status")
 
 
 if __name__ == "__main__":

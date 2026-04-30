@@ -1,19 +1,20 @@
-import sqlite3
-import os
-import re
 import glob
+import os
+import sqlite3
+from typing import Any
+
 from database import DB_NAME
 
 # SQL file paths
-DROP_TABLES_FILE = 'sql/drop_tables.sql'
-INDEX_FILE = 'sql/index.sql'
-SCHEMAS_DIR = 'sql/schemas'
+DROP_TABLES_FILE = "sql/drop_tables.sql"
+INDEX_FILE = "sql/index.sql"
+SCHEMAS_DIR = "sql/schemas"
 
 
 def parse_sql_columns(sql_content, table_name):
     """Parse SQL CREATE TABLE statement to extract column names by executing it in memory."""
     try:
-        mem_db = sqlite3.connect(':memory:')
+        mem_db = sqlite3.connect(":memory:")
         mem_db.executescript(sql_content)
         cursor = mem_db.cursor()
         cursor.execute(f"PRAGMA table_info({table_name})")
@@ -25,16 +26,16 @@ def parse_sql_columns(sql_content, table_name):
         return []
 
 
-def build_tables_config():
+def build_tables_config() -> dict[str, Any]:
     """Dynamically build TABLES configuration by scanning the schemas directory."""
-    tables = {}
+    tables: dict[str, Any] = {}
 
     if not os.path.exists(SCHEMAS_DIR):
         print(f"Warning: Schemas directory '{SCHEMAS_DIR}' not found")
         return tables
 
     # Get all .sql files in the schemas directory
-    sql_files = glob.glob(os.path.join(SCHEMAS_DIR, '*.sql'))
+    sql_files = glob.glob(os.path.join(SCHEMAS_DIR, "*.sql"))
 
     for file_path in sql_files:
         # Extract table name from filename
@@ -43,20 +44,16 @@ def build_tables_config():
 
         try:
             # Read and parse the SQL file to get columns
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 sql_content = f.read()
 
             columns = parse_sql_columns(sql_content, table_name)
 
             if columns:
-                tables[table_name] = {
-                    'file': file_path,
-                    'columns': columns
-                }
+                tables[table_name] = {"file": file_path, "columns": columns}
                 print(f"Loaded table config for '{table_name}': {columns}")
             else:
-                print(
-                    f"Warning: Could not parse columns for table '{table_name}'")
+                print(f"Warning: Could not parse columns for table '{table_name}'")
 
         except Exception as e:
             print(f"Error reading SQL file '{file_path}': {e}")
@@ -68,12 +65,12 @@ def build_tables_config():
 TABLES = build_tables_config()
 
 
-def check_database_exists():
+def check_database_exists() -> bool:
     """Check if the database file exists."""
     return os.path.exists(DB_NAME)
 
 
-def get_table_info(cursor, table_name):
+def get_table_info(cursor: sqlite3.Cursor, table_name: str) -> list[Any]:
     """Get information about a table's columns."""
     try:
         cursor.execute(f"PRAGMA table_info({table_name})")
@@ -82,23 +79,22 @@ def get_table_info(cursor, table_name):
         return []
 
 
-def table_exists(cursor, table_name):
+def table_exists(cursor: sqlite3.Cursor, table_name: str) -> bool:
     """Check if a table exists in the database."""
-    cursor.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
     return cursor.fetchone() is not None
 
 
-def get_expected_tables():
+def get_expected_tables() -> dict[str, list[str]]:
     """Return the expected table structure from schema."""
-    return {table: config['columns'] for table, config in TABLES.items()}
+    return {table: config["columns"] for table, config in TABLES.items()}
 
 
-def get_table_dependency_order():
+def get_table_dependency_order() -> list[str]:
     """Return tables in dependency order for safe creation/deletion."""
     # Define dependency order manually for foreign key constraints
     # This could be made dynamic by parsing foreign key relationships
-    known_order = ['users', 'tasks', 'tags', 'task_tags']
+    known_order = ["users", "tasks", "tags", "task_tags"]
 
     # Add any dynamically discovered tables that aren't in known_order
     all_tables = list(TABLES.keys())
@@ -110,7 +106,7 @@ def get_table_dependency_order():
     return [table for table in known_order if table in TABLES]
 
 
-def verify_database_schema(db):
+def verify_database_schema(db: sqlite3.Connection) -> list[str]:
     """Verify that all required tables and columns exist."""
     cursor = db.cursor()
     expected_tables = get_expected_tables()
@@ -122,21 +118,21 @@ def verify_database_schema(db):
         else:
             # Check if all expected columns exist
             table_info = get_table_info(cursor, table_name)
-            existing_columns = [col[1]
-                                # col[1] is the column name
-                                for col in table_info]
+            existing_columns = [
+                col[1]
+                # col[1] is the column name
+                for col in table_info
+            ]
 
-            missing_columns = [
-                col for col in expected_columns if col not in existing_columns]
+            missing_columns = [col for col in expected_columns if col not in existing_columns]
             if missing_columns:
-                print(
-                    f"Warning: Table '{table_name}' is missing columns: {missing_columns}")
+                print(f"Warning: Table '{table_name}' is missing columns: {missing_columns}")
                 missing_tables.append(table_name)
 
     return missing_tables
 
 
-def create_database_schema(db):
+def create_database_schema(db: sqlite3.Connection) -> bool:
     """Create the database schema from individual SQL files."""
     try:
         # Create tables in dependency order
@@ -144,14 +140,14 @@ def create_database_schema(db):
 
         for table_name in table_order:
             if table_name in TABLES:
-                file_path = TABLES[table_name]['file']
-                with open(file_path, 'r', encoding="utf-8") as f:
+                file_path = TABLES[table_name]["file"]
+                with open(file_path, "r", encoding="utf-8") as f:
                     table_schema = f.read()
                 db.executescript(table_schema)
 
         # Create indexes
         try:
-            with open(INDEX_FILE, 'r', encoding="utf-8") as f:
+            with open(INDEX_FILE, "r", encoding="utf-8") as f:
                 index_schema = f.read()
             db.executescript(index_schema)
         except FileNotFoundError:
@@ -166,7 +162,7 @@ def create_database_schema(db):
         return False
 
 
-def create_missing_tables(db, missing_tables):
+def create_missing_tables(db: sqlite3.Connection, missing_tables: list[str]) -> bool:
     """Create missing tables using individual SQL files."""
     try:
         # Create tables in dependency order to respect foreign key constraints
@@ -174,16 +170,16 @@ def create_missing_tables(db, missing_tables):
 
         for table_name in table_order:
             if table_name in missing_tables and table_name in TABLES:
-                file_path = TABLES[table_name]['file']
+                file_path = TABLES[table_name]["file"]
                 print(f"Creating table '{table_name}' from {file_path}")
 
-                with open(file_path, 'r', encoding="utf-8") as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     table_schema = f.read()
                 db.executescript(table_schema)
 
         # Create indexes for missing tables
         try:
-            with open(INDEX_FILE, 'r', encoding="utf-8") as f:
+            with open(INDEX_FILE, "r", encoding="utf-8") as f:
                 index_schema = f.read()
             db.executescript(index_schema)
         except FileNotFoundError:
@@ -198,7 +194,7 @@ def create_missing_tables(db, missing_tables):
         return False
 
 
-def auto_init_db():
+def auto_init_db() -> bool:
     """
     Automatically initialize the database if needed.
     This function checks if the database exists and has all required tables.
@@ -243,13 +239,13 @@ def auto_init_db():
         return False
 
 
-def init_db():
+def init_db() -> bool:
     """Initialize the database by dropping existing tables and recreating them."""
     try:
         db = sqlite3.connect(DB_NAME)
 
         # First drop all tables and indexes
-        with open(DROP_TABLES_FILE, 'r', encoding="utf-8") as f:
+        with open(DROP_TABLES_FILE, "r", encoding="utf-8") as f:
             db.executescript(f.read())
 
         # Then create the schema
@@ -269,12 +265,12 @@ def init_db():
         return False
 
 
-def reset_database():
+def reset_database() -> bool:
     """Reset the database by dropping all tables and recreating them."""
     print("Warning: This will delete all existing data!")
     confirm = input("Are you sure you want to reset the database? (yes/no): ")
 
-    if confirm.lower() in ['yes', 'y']:
+    if confirm.lower() in ["yes", "y"]:
         if init_db():
             print("Database reset completed!")
             return True
@@ -286,13 +282,13 @@ def reset_database():
         return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1:
-        if sys.argv[1] == 'reset':
+        if sys.argv[1] == "reset":
             reset_database()
-        elif sys.argv[1] == 'auto':
+        elif sys.argv[1] == "auto":
             auto_init_db()
         else:
             print("Usage: python init_db.py [reset|auto]")
@@ -302,7 +298,7 @@ if __name__ == '__main__':
         # Default behavior - full initialization with confirmation
         print("Warning: This will delete all existing data and reset the database!")
         confirm = input("Are you sure you want to continue? (yes/no): ")
-        if confirm.lower() in ['yes', 'y']:
+        if confirm.lower() in ["yes", "y"]:
             init_db()
         else:
             print("Database initialization cancelled.")

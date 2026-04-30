@@ -34,14 +34,24 @@ To run the application, follow these steps:
 6. Run the app by running the following command:
 
    ```bash
-   python app.py
+   uv run poe dev
    ```
 
-   or
+   *(Alternatively, run `python app.py` or `uv run app.py`)*
 
-   ```bash
-   uv run app.py
-   ```
+## Development Commands
+
+This project uses **Ruff** for linting and formatting (ESLint/Prettier equivalent), and **mypy** for type checking. You can run these tasks using `uv run poe <command>`:
+
+| Command | Description |
+| :--- | :--- |
+| **`uv run poe check`** | Run all checks (linting + type checking) |
+| **`uv run poe typecheck`** | Run `mypy` type checking |
+| **`uv run poe lint`** | Run `ruff` linting |
+| **`uv run poe format`** | Run `ruff` formatting |
+| **`uv run poe dev`** | Start the development server |
+| **`uv run poe db-init`** | Auto-initialize the database |
+| **`uv run poe db-reset`** | Reset the database (wipes all data) |
 
 ## Description
 
