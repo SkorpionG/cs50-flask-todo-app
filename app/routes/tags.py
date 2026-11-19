@@ -1,35 +1,13 @@
-import re
 import sqlite3
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.wrappers import Response
 
-from database import get_db, get_user_tag, get_user_tags
-from middleware import login_required, with_context
+from app.db import get_db, get_user_tag, get_user_tags
+from app.utils.decorators import login_required, with_context
+from app.utils.validation import validate_tag
 
 tags_bp = Blueprint("tags", __name__)
-
-
-def validate_tag(name: str | None, color: str | None = None) -> list[str]:
-    errors: list[str] = []
-
-    if not name or len(name.strip()) == 0:
-        errors.append("Tag name is required")
-        return errors
-    elif len(name) > 50:
-        errors.append("Tag name must be less than 50 characters")
-
-    # Check for special characters
-    if not name.replace("-", "").replace("_", "").isalnum():
-        errors.append("Tag name can only contain letters, numbers, hyphens, and underscores")
-
-    # Validate color if provided
-    if color:
-        # Check if color is a valid hex color
-        if not re.match(r"^#(?:[0-9a-fA-F]{3}){1,2}$", color):
-            errors.append("Invalid color format. Please use hex color (e.g., #FF0000)")
-
-    return errors
 
 
 @tags_bp.route("/tags")
@@ -55,7 +33,7 @@ def create_tag() -> str | Response:
     if errors:
         for error in errors:
             flash(error, "danger")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
 
     try:
         db = get_db()
@@ -66,7 +44,7 @@ def create_tag() -> str | Response:
 
         if cursor.fetchone():
             flash("A tag with this name already exists.", "danger")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("main.dashboard"))
 
         # Create new tag
         cursor.execute(
@@ -131,7 +109,7 @@ def edit_tag(tag_id: int) -> str | Response:
         try:
             cursor.execute(
                 """
-                UPDATE tags 
+                UPDATE tags
                 SET name = ?, color = ?
                 WHERE id = ? AND user_id = ?
             """,

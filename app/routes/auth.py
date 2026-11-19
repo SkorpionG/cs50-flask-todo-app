@@ -4,8 +4,8 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.wrappers import Response
 
-from database import get_db
-from validation import validate_email, validate_password
+from app.db import get_db
+from app.utils.validation import validate_email, validate_password
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -13,7 +13,7 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register() -> str | Response:
     if session.get("user_id"):
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
     if request.method == "POST":
         username = request.form.get("username")
         email = request.form.get("email")
@@ -66,7 +66,7 @@ def register() -> str | Response:
                 session.permanent = True
             flash("Registration successful!", "success")
 
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("main.dashboard"))
 
         except sqlite3.Error:
             flash("Registration failed", "danger")
@@ -80,7 +80,7 @@ def register() -> str | Response:
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login() -> str | Response:
     if session.get("user_id"):
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
@@ -107,7 +107,7 @@ def login() -> str | Response:
                 session.permanent = True
 
             flash("Successfully logged in!", "success")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("main.dashboard"))
 
         except sqlite3.Error:
             flash("Login failed", "danger")
@@ -123,7 +123,7 @@ def logout() -> Response:
     if session.get("user_id"):
         session.clear()
         flash("You have been logged out", "info")
-    return redirect(url_for("index"))
+    return redirect(url_for("main.index"))
 
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])

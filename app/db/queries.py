@@ -3,7 +3,9 @@ import sqlite3
 from datetime import datetime
 from typing import Any
 
-DB_NAME = "database.db"
+from flask import current_app, has_app_context
+
+from app.config import DATABASE_PATH
 
 # Database connection helper
 
@@ -18,7 +20,8 @@ def get_db() -> sqlite3.Connection:
     Returns:
         sqlite3.Connection: A connection to the database.
     """
-    db = sqlite3.connect(DB_NAME)
+    db_path = current_app.config.get("DATABASE_PATH", DATABASE_PATH) if has_app_context() else DATABASE_PATH
+    db = sqlite3.connect(db_path)
     db.row_factory = sqlite3.Row
     return db
 
@@ -145,7 +148,7 @@ def get_user_tasks(
 
         # Base query
         query = """
-            SELECT 
+            SELECT
                 t.*,
                 GROUP_CONCAT(tag.id) as tag_ids,
                 GROUP_CONCAT(tag.name) as tag_names,
@@ -227,7 +230,8 @@ def get_user_tasks(
                 colors = task_dict["tag_colors"].split(",")
                 ids = task_dict["tag_ids"].split(",")
                 task_dict["tags"] = [
-                    {"id": int(id), "name": name, "color": color} for id, name, color in zip(ids, names, colors)
+                    {"id": int(id), "name": name, "color": color}
+                    for id, name, color in zip(ids, names, colors, strict=True)
                 ]
             else:
                 task_dict["tags"] = []
@@ -250,24 +254,32 @@ def get_user_tasks(
 
 def get_column_constraints(table_name: str, column_name: str) -> list[str]:
     db = get_db()
-    cursor = db.cursor()
+    try:
+        cursor = db.cursor()
 
-    # Get table info
-    cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
-    create_sql = cursor.fetchone()["sql"]
+        # Get table info
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        row = cursor.fetchone()
+        if not row:
+            return []
+        create_sql: str = row["sql"]
 
-    # Parse the CHECK constraint
-    constraint_pattern = rf"{column_name} TEXT CHECK\({column_name} IN \((.+?)\)\)"
-    match = re.search(constraint_pattern, create_sql)
+        # Parse the CHECK constraint (case-insensitive and multiline-safe)
+        constraint_pattern = (
+            rf"{re.escape(column_name)}\s+TEXT\s+CHECK\s*\(\s*{re.escape(column_name)}\s+IN\s*\((.+?)\)\s*\)"
+        )
+        match = re.search(constraint_pattern, create_sql, re.IGNORECASE | re.DOTALL)
 
-    if match:
-        # Extract values from the constraint
-        values_str = match.group(1)
-        # Convert "'High', 'Medium', 'Low'" to ['High', 'Medium', 'Low']
-        values = [val.strip("' ") for val in values_str.split(",")]
-        return values
+        if match:
+            # Extract values from the constraint
+            values_str = match.group(1)
+            # Convert "'High', 'Medium', 'Low'" to ['High', 'Medium', 'Low']
+            values = [val.strip().strip("'\"") for val in values_str.split(",") if val.strip()]
+            return values
 
-    return []
+        return []
+    finally:
+        db.close()
 
 
 def task_priority_options() -> list[str]:
@@ -276,21 +288,3 @@ def task_priority_options() -> list[str]:
 
 def task_status_options() -> list[str]:
     return get_column_constraints("tasks", "status")
-
-
-if __name__ == "__main__":
-    # columns = get_task_columns()
-    # print(columns)
-    # columns = get_tag_columns()
-    # print(columns)
-    # priority_options = task_priority_options()
-    # print(priority_options)
-    # status_options = task_status_options()
-    # print(status_options)
-
-    tasks = get_user_tasks(
-        user_id=1,
-    )
-
-    for task in tasks:
-        print(task)

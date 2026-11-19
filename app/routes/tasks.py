@@ -1,58 +1,13 @@
 import sqlite3
-from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.wrappers import Response
 
-from database import get_db, get_user_tasks, task_priority_options, task_status_options
-from middleware import login_required, with_context
+from app.db import get_db, get_user_tasks, task_status_options
+from app.utils.decorators import login_required, with_context
+from app.utils.validation import convert_datetime_format, validate_task
 
 tasks_bp = Blueprint("tasks", __name__)
-
-
-def convert_datetime_format(datetime_string: str | None) -> str | None:
-    if not datetime_string:
-        return None
-    try:
-        return datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        print("Invalid datetime string")
-        return datetime_string
-
-
-def validate_task(
-    title: str | None, description: str | None, due_date: str | None, priority: str | None, status: str | None
-) -> list[str]:
-    errors: list[str] = []
-
-    # Title validation
-    if not title or len(title.strip()) == 0:
-        errors.append("Title is required")
-    elif len(title) > 100:
-        errors.append("Title must be less than 100 characters")
-
-    # Description validation (optional but with max length)
-    if description and len(description) > 500:
-        errors.append("Description must be less than 500 characters")
-
-    # Due date validation
-    if due_date:
-        try:
-            datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            errors.append("Invalid due date format")
-
-    # Priority validation
-    valid_priorities = task_priority_options()
-    if priority not in valid_priorities:
-        errors.append("Invalid priority level")
-
-    # Status validation
-    valid_statuses = task_status_options()
-    if status not in valid_statuses:
-        errors.append("Invalid status")
-
-    return errors
 
 
 @tasks_bp.route("/tasks")
@@ -93,7 +48,7 @@ def create_task() -> str | Response:
     if errors:
         for error in errors:
             flash(error, "danger")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
 
     due_date = convert_datetime_format(due_date)
     try:
@@ -177,8 +132,8 @@ def edit_task(task_id: int) -> str | Response:
             try:
                 cursor.execute(
                     """
-                    UPDATE tasks 
-                    SET title = ?, description = ?, due_date = ?, 
+                    UPDATE tasks
+                    SET title = ?, description = ?, due_date = ?,
                         priority = ?, status = ?, modified_at = CURRENT_TIMESTAMP
                     WHERE id = ? AND user_id = ?
                 """,
@@ -226,7 +181,7 @@ def edit_task(task_id: int) -> str | Response:
     # Get task
     cursor.execute(
         """
-        SELECT * FROM tasks 
+        SELECT * FROM tasks
         WHERE id = ? AND user_id = ?
     """,
         (task_id, session["user_id"]),
@@ -269,7 +224,7 @@ def update_status(task_id: int) -> Response:
 
         cursor.execute(
             """
-            UPDATE tasks 
+            UPDATE tasks
             SET status = ?, modified_at = CURRENT_TIMESTAMP
             WHERE id = ? AND user_id = ?
         """,

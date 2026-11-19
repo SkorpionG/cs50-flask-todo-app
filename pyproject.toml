@@ -16,26 +16,50 @@ dependencies = [
 dev = [
     "mypy>=1.20.2",
     "poethepoet>=0.45.0",
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
     "ruff>=0.15.12",
 ]
 
 [tool.mypy]
-ignore_missing_imports = true
+python_version = "3.13"
+files = ["app", "run.py", "tests"]
+explicit_package_bases = true
+check_untyped_defs = true
+disallow_untyped_defs = true
 warn_return_any = true
 warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.ruff]
+target-version = "py313"
 line-length = 120
 
 [tool.ruff.lint]
-# Enable Pyflakes (F), Error (E), and isort (I)
-select = ["E", "F", "I"]
+# E/W: pycodestyle, F: Pyflakes, I: isort, UP: pyupgrade, B: flake8-bugbear
+select = ["E", "W", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
 
 [tool.poe.tasks]
-dev = "python app.py"
-typecheck = "mypy ."
+dev = "flask --app app run --debug"
+test = "pytest"
+typecheck = "mypy"
 lint = "ruff check ."
+lint-fix = "ruff check --fix ."
 format = "ruff format ."
-check = ["lint", "typecheck"]
-db-init = "python db.py auto"
-db-reset = "python db.py reset"
+format-check = "ruff format --check ."
+check = ["lint", "format-check", "typecheck", "test"]
+db-init = "python -m app.db auto"
+db-reset = "python -m app.db reset"

@@ -140,8 +140,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
+# mypy & ruff
 .mypy_cache/
+.ruff_cache/
 .dmypy.json
 dmypy.json
 
@@ -164,3 +165,4 @@ cython_debug/
 .DS_Store
 .env
 database.db
+.specstory/

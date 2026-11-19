@@ -1,13 +1,12 @@
-# settings.py
 import sqlite3
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.wrappers import Response
 
-from database import get_db
-from middleware import login_required
-from validation import validate_email, validate_password
+from app.db import get_db
+from app.utils.decorators import login_required
+from app.utils.validation import validate_email, validate_password
 
 settings_bp = Blueprint("settings", __name__)
 
@@ -21,8 +20,8 @@ def settings() -> str:
     # Get user's current information
     cursor.execute(
         """
-        SELECT username, email 
-        FROM users 
+        SELECT username, email
+        FROM users
         WHERE id = ?
     """,
         (session["user_id"],),
@@ -55,7 +54,7 @@ def update_profile() -> Response:
         # Check if email is already in use by another user
         cursor.execute(
             """
-            SELECT id FROM users 
+            SELECT id FROM users
             WHERE email = ? AND id != ?
         """,
             (email, session["user_id"]),
@@ -68,8 +67,8 @@ def update_profile() -> Response:
         # Update user information
         cursor.execute(
             """
-            UPDATE users 
-            SET username = ?, email = ? 
+            UPDATE users
+            SET username = ?, email = ?
             WHERE id = ?
         """,
             (username, email, session["user_id"]),
@@ -106,8 +105,8 @@ def update_password() -> Response:
         # Verify current password
         cursor.execute(
             """
-            SELECT password_hash 
-            FROM users 
+            SELECT password_hash
+            FROM users
             WHERE id = ?
         """,
             (session["user_id"],),
@@ -120,9 +119,13 @@ def update_password() -> Response:
             return redirect(url_for("settings.settings"))
 
         # Validate new password
-        errors = []
-        if not validate_password(new_password):
-            errors.append("Invalid password")
+        errors: list[str] = []
+        is_valid, password_msg = validate_password(new_password)
+        if not is_valid:
+            if isinstance(password_msg, list):
+                errors.extend(password_msg)
+            else:
+                errors.append(password_msg)
         if new_password != confirm_password:
             errors.append("Passwords do not match")
         if check_password_hash(actual_current_password, new_password):
@@ -137,8 +140,8 @@ def update_password() -> Response:
         password_hash = generate_password_hash(new_password)
         cursor.execute(
             """
-            UPDATE users 
-            SET password_hash = ? 
+            UPDATE users
+            SET password_hash = ?
             WHERE id = ?
         """,
             (password_hash, session["user_id"]),
@@ -173,8 +176,8 @@ def delete_account() -> Response:
         # Verify password
         cursor.execute(
             """
-            SELECT password_hash 
-            FROM users 
+            SELECT password_hash
+            FROM users
             WHERE id = ?
         """,
             (session["user_id"],),
@@ -189,7 +192,7 @@ def delete_account() -> Response:
         # First, delete task_tags associations
         cursor.execute(
             """
-            DELETE FROM task_tags 
+            DELETE FROM task_tags
             WHERE task_id IN (
                 SELECT id FROM tasks WHERE user_id = ?
             )
@@ -220,4 +223,4 @@ def delete_account() -> Response:
     finally:
         db.close()
 
-    return redirect(url_for("index"))
+    return redirect(url_for("main.index"))

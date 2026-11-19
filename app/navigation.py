@@ -3,21 +3,21 @@ from typing import Any
 NAV_ITEMS: list[dict[str, Any]] = [
     {
         "name": "Home",
-        "url": "index",  # should be name of the route function
+        "url": "main.index",  # Blueprint endpoint name
         "requires_auth": False,
     },
-    {"name": "About", "url": "about", "requires_auth": False},
+    {"name": "About", "url": "main.about", "requires_auth": False},
 ]
 
 AUTH_ITEMS: list[dict[str, Any]] = [
-    {"name": "Register", "url": "register", "requires_auth": False},
-    {"name": "Login", "url": "login", "requires_auth": False},
+    {"name": "Register", "url": "auth.register", "requires_auth": False},
+    {"name": "Login", "url": "auth.login", "requires_auth": False},
 ]
 
 DASHBOARD_TABS: list[dict[str, Any]] = [
     {
         "name": "Home",
-        "url": "dashboard",
+        "url": "main.dashboard",
         "icon": "fa-home",
     },
     {

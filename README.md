@@ -19,39 +19,45 @@ To run the application, follow these steps:
    uv sync
    ```
 
-5. Setting up the database by running the following command:
+5. Set up the database by running:
 
    ```bash
-   python db.py
+   uv run poe db-init
    ```
 
-   or
+   *(Alternatively, run `python -m app.db auto` or `flask --app app db-init`)*
 
-   ```bash
-   uv run db.py
-   ```
-
-6. Run the app by running the following command:
+6. Run the app by running:
 
    ```bash
    uv run poe dev
    ```
 
-   *(Alternatively, run `python app.py` or `uv run app.py`)*
+   *(Alternatively, run `uv run flask --app app run --debug` or `uv run python run.py`)*
 
 ## Development Commands
 
-This project uses **Ruff** for linting and formatting (ESLint/Prettier equivalent), and **mypy** for type checking. You can run these tasks using `uv run poe <command>`:
+This project uses **Ruff** for linting and formatting, **mypy** for type checking, **pytest** for testing, and **pre-commit** for git hooks. You can run these tasks using `uv run poe <command>`:
 
 | Command | Description |
 | :--- | :--- |
-| **`uv run poe check`** | Run all checks (linting + type checking) |
+| **`uv run poe check`** | Run all checks (linting + format check + type checking + tests) |
+| **`uv run poe test`** | Run `pytest` test suite |
 | **`uv run poe typecheck`** | Run `mypy` type checking |
 | **`uv run poe lint`** | Run `ruff` linting |
-| **`uv run poe format`** | Run `ruff` formatting |
-| **`uv run poe dev`** | Start the development server |
-| **`uv run poe db-init`** | Auto-initialize the database |
-| **`uv run poe db-reset`** | Reset the database (wipes all data) |
+| **`uv run poe lint-fix`** | Run `ruff` linting with auto-fix |
+| **`uv run poe format`** | Format code with `ruff format` |
+| **`uv run poe format-check`** | Verify code formatting without modifying files |
+| **`uv run poe dev`** | Start the Flask development server (`flask --app app run --debug`) |
+| **`uv run poe db-init`** | Auto-initialize the database (`python -m app.db auto`) |
+| **`uv run poe db-reset`** | Reset the database — wipes all data (`python -m app.db reset`) |
+
+To enable the pre-commit hooks locally on a fresh clone:
+
+```bash
+uv sync
+uv run pre-commit install
+```
 
 ## Description
 
@@ -75,30 +81,37 @@ Lastly, the app provides a setting page where the user can modify their account 
 
 ### Frontend Logic
 
-The majority of the code associated with the frontend is located within the "static" and "templates" directories. The "templates" directory is where all the HTML and Jinja templates are located. Within this directory, there are several and html files for different purposes:
+The majority of the code associated with the frontend is located within `app/static/` and `app/templates/`. The `app/templates/` directory is where all the HTML and Jinja templates are located:
 
-- The "auth" folder contain files associated with user authentication pages (such as login and registration).
-- The "components" folder contain html components that are reusable throughout the application. These components are simpler in terms of structure, and usually doesn't depend on data coming from the backend.
-- The "macros" folder contain jinja macros what works similar to components, except that each html file inside the "macros" folder can contain multiple "macro" that works like a python function. This is because these macros can be imported by other html files using a python-like syntax, and can accept arguments just like a python function. These features sets them apart from what's inside the "components" folder, and makes it easier to manage the complexity of this project and make parts of the code reusable.
-- The "user" folder contains pages that are more associated with the majority part of the application, which is not accessible by default unless the user is logged in. These pages include dashboard page, settings page, tasks and tags pages, and forms that will be populated with user information once logged in.
-- The reset of the html files inside this folder is some generic html files that display the basic information about the app, rendering the home page (not user dashboard), and defines the base template for all the other pages.
+- `auth/`: user authentication pages (login, registration, password reset).
+- `components/`: reusable HTML components that do not depend on backend data.
+- `macros/`: Jinja macros that accept arguments and can be imported across templates.
+- `user/`: authenticated pages including dashboard, settings, tasks, and tags views and forms.
+- Root templates (`index.html`, `about.html`, `layout.html`): public pages and base layout.
 
-Inside the "static" folder is where all the CSS and JavaScript code is located. Some of the files inside the "css" folder are associated with a particular html template, while others are for application-wide styling. For example, the "flash-messages" css file is required in order to style the "flash-messages" html macro. The same idea applies to the js files inside the "js" folder, where "flash-messages.js" is required add interactivity to flash messages. Some files, like styles.scss and script.js are associated with the entire application, whereas others are for a specific component/template. The assets folder is where all the image assets is stored, such as website logo.
+Inside `app/static/` are CSS/SCSS stylesheets (`css/`), client-side JavaScript (`js/`), and image/icon assets (`assets/`).
 
 ### Backend Logic
 
-Most of the python files outside both the "static" and "templates" folders are associated with with the application's backend logic. What each files does are the follow:
+The backend follows the Flask **Application Factory** and **Blueprints** convention inside the `app/` package (with a thin `run.py` entry point at the repository root):
 
-- The app.py is responsible for rendering the index.html, about page, and the user dashboard. It also contains some useful functionality such as context processor and datetime formatting that other part of the backend might need as well.
-- The auth.py is responsible for rendering user registration, login, and password reset pages, as well as handle requests for login and account registration.
-- The tasks.py is responsible for rendering pages about user tasks, and handle request for creating, editing, updating, and deleting user tasks.
-- The tags.py is responsible for rendering pages about user tags, and handle request for creating, editing, updating, and deleting user tags.
-- The settings.py is responsible for rendering settings pages, and handle request for updating user profile settings such as username, email, password, and account deletion.
-- The validation.py is where functions for email and password validation are defined.
-- The navigation.py stores several variables that tells the frontend what pages to display and the corresponding routes, name, and even icons associated with each page.
-- The middleware.py contains some flask middleware process the request before it reach the actual routes, such as the login_required middleware that make sure a specific page is only accessible to logged in users. These functions makes the backend code more reusable.
-- The db.py contains functions to setup the database file. When executed, it reads the database schemas from the **sql/schemas** directory, connects to database.db (where all the user data is stored), and can automatically initialize or drop and recreate the database schema for all tables.
-- The database.py contains many functions that make interacting with the database easier, and also makes the code to to so much reusable.
+- `app/__init__.py`: Application factory (`create_app()`) that loads config, initializes the database, and registers blueprints, context processors, template filters, and Flask CLI commands.
+- `app/config.py`: Configuration settings and `pathlib.Path`-based locations for the database and `sql/` directory.
+- `app/context.py`: Jinja template filters (`format_datetime`), context processors, and lazy schema metadata helpers.
+- `app/navigation.py`: Navigation links and dashboard sidebar tab definitions.
+- `app/routes/`: Feature blueprints:
+  - `main.py` (`main_bp`): Home (`/`), about (`/about`), and user dashboard (`/dashboard`).
+  - `auth.py` (`auth_bp`): Registration, login, logout, and password reset routes.
+  - `tasks.py` (`tasks_bp`): Task CRUD, status updates, and completed tasks views.
+  - `tags.py` (`tags_bp`): Tag CRUD and tag search/listing API endpoints.
+  - `settings.py` (`settings_bp`): Profile updates, password changes, and account deletion.
+- `app/db/`: Database layer:
+  - `queries.py`: SQLite connection helper (`get_db`) and reusable query helpers.
+  - `init_db.py`: Schema verification, auto-initialization, and reset utilities reading from `sql/schemas/`.
+  - `__main__.py`: CLI entry point (`python -m app.db [auto|reset]`).
+- `app/utils/`: Shared utilities:
+  - `decorators.py`: Route decorators (`login_required`, `with_context`).
+  - `validation.py`: Input validation and datetime conversion helpers.
 
 ### Database
 
@@ -111,4 +124,4 @@ Inside the database.db, there are 3 tables that are responsible for storing user
 
 ### Notes
 
-Before running the application, be sure to install all the required libraries and run `db.py` to initialize the database.
+Before running the application, be sure to install all the required libraries and run `uv run poe db-init` (or `python -m app.db auto`) to initialize the database.

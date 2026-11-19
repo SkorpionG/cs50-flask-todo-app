@@ -9,7 +9,7 @@
 {% macro navbar(pages, is_authenticated=False) %}
 <nav class="navbar navbar-expand-sm bg-body-tertiary" role="navigation">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('index') }}">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
             <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Logo" width="30" height="24"
                 class="d-inline-block align-text-top">
             Todo App
@@ -34,8 +34,8 @@
                 {% if is_authenticated %}
                 {{ nav_item(
                     name='Dashboard',
-                    url=url_for('dashboard'),
-                    active= endpoint == 'dashboard' and path == url_for('dashboard')
+                    url=url_for('main.dashboard'),
+                    active= endpoint == 'main.dashboard' and path == url_for('main.dashboard')
                 )}}
                 {{ nav_item(
                     name='Logout',
